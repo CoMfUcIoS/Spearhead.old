@@ -1,0 +1,14 @@
+{
+  "name": "cerberus",
+  "version": "1.0.0",
+  "description": "Proxy 80 port to our apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "http-proxy": "^1.15.1"
+  }
+}
