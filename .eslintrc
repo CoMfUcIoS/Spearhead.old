@@ -1,0 +1,261 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "worker": true,
+    "jquery": true,
+    "qunit": true
+  },
+  "extends": "eslint:recommended",
+  "globals": {
+    "oxygen": true,
+    "pace": true,
+    "_": true,
+    "VK_0": true,
+    "VK_1": true,
+    "VK_2": true,
+    "VK_3": true,
+    "VK_4": true,
+    "VK_5": true,
+    "VK_6": true,
+    "VK_7": true,
+    "VK_8": true,
+    "VK_9": true,
+    "VK_UP": true,
+    "VK_DOWN": true,
+    "VK_LEFT": true,
+    "VK_RIGHT": true,
+    "VK_OK": true,
+    "VK_BACK": true,
+    "VK_INFO": true,
+    "VK_CHANNEL_UP": true,
+    "VK_CHANNEL_DOWN": true,
+    "VK_RED": true,
+    "VK_GREEN": true,
+    "VK_YELLOW": true,
+    "VK_BLUE": true,
+    "VK_TV": true,
+    "VK_VOD": true,
+    "VK_GUIDE": true,
+    "VK_ACTIVE": true,
+    "VK_APPS": true,
+    "VK_PLANNER": true,
+    "VK_SETUP": true,
+    "VK_MENU": true,
+    "VK_STANDBY": true,
+    "VK_HELP": true,
+    "VK_SEARCH": true,
+    "VK_VOLUME_MUTE": true,
+    "VK_VOLUME_UP": true,
+    "VK_VOLUME_DOWN": true,
+    "VK_PLAY": true,
+    "VK_PAUSE": true,
+    "VK_FAST_FORWARD": true,
+    "VK_REWIND": true,
+    "VK_STOP": true,
+    "VK_RECORD": true,
+    "VK_STAR": true,
+    "VK_SOURCE": true
+  },
+  "root": true,
+  "rules": {
+    "array-bracket-spacing": [
+      "warn",
+      "never",
+      {
+        "objectsInArrays": false
+      }
+    ],
+    "array-callback-return": "error",
+    "block-scoped-var": "error",
+    "block-spacing": "warn",
+    "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+    "camelcase": "error",
+    "comma-spacing": "error",
+    "comma-style": "error",
+    "complexity": [
+      "error",
+      {
+        "max": 20
+      }
+    ],
+    "computed-property-spacing": "warn",
+    "consistent-return": "error",
+    "curly": ["error", "all"],
+    "dot-notation": [
+      "error",
+      {
+        "allowKeywords": false,
+        "allowPattern": "^\\$"
+      }
+    ],
+    "eqeqeq": "error",
+    "func-style": ["error", "declaration"],
+    "indent": [
+      "warn",
+      2,
+      {
+        "SwitchCase": 1,
+        "VariableDeclarator": 2
+      }
+    ],
+    "jsx-quotes": ["error", "prefer-double"],
+    "key-spacing": [
+      "warn",
+      {
+        "beforeColon": false,
+        "afterColon": true
+      }
+    ],
+    "keyword-spacing": "warn",
+    "linebreak-style": [
+      "warn",
+      "unix"
+    ],
+    "max-depth": ["warn", 4],
+    "max-nested-callbacks": [
+      "warn",
+      {
+        "max": 10
+      }
+    ],
+    "max-params": ["error", 3],
+    "max-statements-per-line": [
+      "error",
+      {
+        "max": 1
+      }
+    ],
+    "new-cap": [
+      "error",
+      {
+        "capIsNewExceptions": [
+          "Deferred"
+        ]
+      }
+    ],
+    "new-parens": "error",
+    "newline-per-chained-call": "error",
+    "no-alert": "error",
+    "no-array-constructor": "error",
+    "no-catch-shadow": "error",
+    "no-cond-assign": ["error", "always"],
+    "no-delete-var": "error",
+    "no-empty-function": "error",
+    "no-eval": "error",
+    "no-extend-native": "error",
+    "no-extra-bind": "error",
+    "no-extra-label": "error",
+    "no-fallthrough": "error",
+    "no-floating-decimal": "error",
+    "no-implicit-globals": "error",
+    "no-implied-eval": "error",
+    "no-invalid-this": "error",
+    "no-label-var": "error",
+    "no-lonely-if": "error",
+    "no-loop-func": "error",
+    "no-mixed-spaces-and-tabs": "error",
+    "no-multi-str": "error",
+    "no-multiple-empty-lines": "error",
+    "no-native-reassign": "error",
+    "no-new": "error",
+    "no-new-func": "error",
+    "no-new-object": "error",
+    "no-new-wrappers": "error",
+    "no-octal": "error",
+    "no-octal-escape": "error",
+    "no-proto": "error",
+    "no-redeclare": "error",
+    "no-return-assign": "error",
+    "no-script-url": "error",
+    "no-self-assign": "error",
+    "no-self-compare": "error",
+    "no-shadow": "error",
+    "no-shadow-restricted-names": "error",
+    "no-spaced-func": "error",
+    "no-trailing-spaces": [
+      "error",
+      {
+        "skipBlankLines": true
+      }
+    ],
+    "no-throw-literal": "error",
+    "no-undef": "error",
+    "no-undef-init": "error",
+    "no-unmodified-loop-condition": "error",
+    "no-unneeded-ternary": "error",
+    "no-unused-expressions": "error",
+    "no-unused-labels": "error",
+    "no-unused-vars": "error",
+    "no-useless-call": "error",
+    "no-useless-concat": "error",
+    "no-useless-escape": "error",
+    "no-void": "error",
+    "no-warning-comments": [
+      "error",
+      {
+        "terms": [
+          "todo",
+          "fixme"
+        ],
+        "location": "start"
+      }
+    ],
+    "no-with": "error",
+    "object-curly-spacing": ["error", "always"],
+    "one-var": "error",
+    "one-var-declaration-per-line": ["error", "always"],
+    "operator-linebreak": ["error", "after"],
+    "quote-props": ["warn", "as-needed"],
+    "quotes": [
+      "warn",
+      "single",
+      {
+        "avoidEscape": true
+      }
+    ],
+    "semi": ["error", "always"],
+    "space-before-function-paren": [
+      "warn",
+      "never"
+    ],
+    "space-before-blocks" : [
+      "error", 
+      { 
+        "functions": "always", 
+        "keywords": "always"
+      }
+    ],
+    "space-in-parens": ["warn", "never"],
+    "space-infix-ops": "warn",
+    "space-unary-ops": [
+      "warn",
+      {
+        "words": true,
+        "nonwords": false
+      }
+    ],
+    "radix": ["error", "always"],
+    "valid-jsdoc": [
+      "error",
+      {
+        "prefer": {
+          "return": "return"
+        },
+        "preferType": {
+          "array": "Array",
+          "boolean": "Boolean",
+          "number": "Number",
+          "object": "Object",
+          "promise": "Promise",
+          "string": "String"
+        },
+        "requireParamDescription": true,
+        "requireReturn": false,
+        "requireReturnDescription": true,
+        "requireReturnType": true
+      }
+    ],
+    "wrap-iife": ["error", "inside"]
+  }
+}
