@@ -1,30 +1,32 @@
-import pm2       from 'pm2';
-import chimera   from './chimera/index.js';
+// We dont use this file at all
 
-const { util }  = chimera.initialize();
-pm2.connect(function(err) {
-  if (err) {
-    util.error(err);
-    process.exit(2);
-  }
+// import pm2       from 'pm2';
+// import chimera   from './chimera/index.js';
 
-  pm2.start([{
-    name        : 'cerberus',
-    script      : 'cerberus/index.js',
-    watch       : true,
-    interpreter : 'babel-node'
-  }, {
-    name        : 'medusa',
-    script      : 'medusa/index.js',
-    watch       : true,
-    interpreter : 'babel-node'
-  }], function(error, apps) {
-    pm2.disconnect();   // Disconnect from PM2
-    if (error) {
-      throw error;
-    }
-  });
-});
+// const { util }  = chimera.initialize();
+// pm2.connect(function(err) {
+//   if (err) {
+//     util.error(err);
+//     process.exit(2);
+//   }
+
+//   pm2.start([{
+//     name        : 'cerberus',
+//     script      : 'cerberus/index.js',
+//     watch       : true,
+//     interpreter : 'babel-node'
+//   }, {
+//     name        : 'medusa',
+//     script      : 'medusa/index.js',
+//     watch       : true,
+//     interpreter : 'babel-node'
+//   }], function(error, apps) {
+//     pm2.disconnect();   // Disconnect from PM2
+//     if (error) {
+//       throw error;
+//     }
+//   });
+// });
 
 
 // Old implementation

@@ -1,5 +1,5 @@
 import express from 'express';
-import chimera    from '../chimera/index.js';
+import chimera from '../chimera/index.js';
 
 const { util }  = chimera.initialize(),
     app = express();
