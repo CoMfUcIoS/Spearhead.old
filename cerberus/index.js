@@ -10,7 +10,7 @@ const    fw  = chimera.initialize();
 
 
 _.forOwn(vhosts, function(value, vhost) {
-  if (vhost !== `${os.hostname().toLowerCase()}.local`) { 
+  if (vhost !== `${os.hostname().toLowerCase()}.local`) {
     alias.publish(vhost);
   }
 });
@@ -31,15 +31,15 @@ var server = http.createServer(function(req, res) {
   var port = vhosts[req.headers.host.toLowerCase()];
 
   proxy.on('error', function(e) {
-   console.log(e);
+    console.log(e);
   });
 
   if (typeof port !== 'undefined') {
-    proxy.web(req, res, { target: 'http://127.0.0.1:'+port });
+    proxy.web(req, res, { target : 'http://127.0.0.1:' + port });
   } else {
-   return null;
-  } 
+    return null;
+  }
 });
 
-console.log("listening on port 80")
+console.log('listening on port 80');
 server.listen(80);

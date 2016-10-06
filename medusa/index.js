@@ -1,10 +1,12 @@
-var express = require('express'),
-    app = express();
+import express from 'express';
 
-app.get('/', function (req, res) {
-  res.sendFile('index.html', {root: __dirname })
+
+var app = express();
+
+app.get('/', function(req, res) {
+  res.sendFile('index.html', { root : __dirname });
 });
 
-app.listen(1233, function () {
+app.listen(1233, function() {
   console.log('Example app listening on port 1233!');
 });
