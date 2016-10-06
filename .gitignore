@@ -1,2 +1,9 @@
-.c9/
-*node_modules/
+/node_modules
+/build
+/docs
+/coverage
+/npm-debug.log
+/test-results.xml
+/jUnit
+/*.todo
+!Project.todo

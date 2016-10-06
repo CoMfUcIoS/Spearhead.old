@@ -4,58 +4,32 @@
     "node": true,
     "worker": true,
     "jquery": true,
-    "qunit": true
+    "qunit": true,
+    "meteor": true
   },
-  "extends": "eslint:recommended",
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "ecmaFeatures": {
+    "jsx": true
+  },
+  "plugins": [
+    "react"
+  ],
   "globals": {
-    "oxygen": true,
-    "pace": true,
-    "_": true,
-    "VK_0": true,
-    "VK_1": true,
-    "VK_2": true,
-    "VK_3": true,
-    "VK_4": true,
-    "VK_5": true,
-    "VK_6": true,
-    "VK_7": true,
-    "VK_8": true,
-    "VK_9": true,
-    "VK_UP": true,
-    "VK_DOWN": true,
-    "VK_LEFT": true,
-    "VK_RIGHT": true,
-    "VK_OK": true,
-    "VK_BACK": true,
-    "VK_INFO": true,
-    "VK_CHANNEL_UP": true,
-    "VK_CHANNEL_DOWN": true,
-    "VK_RED": true,
-    "VK_GREEN": true,
-    "VK_YELLOW": true,
-    "VK_BLUE": true,
-    "VK_TV": true,
-    "VK_VOD": true,
-    "VK_GUIDE": true,
-    "VK_ACTIVE": true,
-    "VK_APPS": true,
-    "VK_PLANNER": true,
-    "VK_SETUP": true,
-    "VK_MENU": true,
-    "VK_STANDBY": true,
-    "VK_HELP": true,
-    "VK_SEARCH": true,
-    "VK_VOLUME_MUTE": true,
-    "VK_VOLUME_UP": true,
-    "VK_VOLUME_DOWN": true,
-    "VK_PLAY": true,
-    "VK_PAUSE": true,
-    "VK_FAST_FORWARD": true,
-    "VK_REWIND": true,
-    "VK_STOP": true,
-    "VK_RECORD": true,
-    "VK_STAR": true,
-    "VK_SOURCE": true
+    "afterEach",
+    "beforeEach",
+    "describe",
+    "expect",
+    "fit",
+    "it",
+    "jest",
+    "xdescribe",
+    "xit"
+  },
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    }
   },
   "root": true,
   "rules": {
@@ -66,7 +40,7 @@
         "objectsInArrays": false
       }
     ],
-    "array-callback-return": "error",
+    "array-callback-return": "warn",
     "block-scoped-var": "error",
     "block-spacing": "warn",
     "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
@@ -90,7 +64,6 @@
       }
     ],
     "eqeqeq": "error",
-    "func-style": ["error", "declaration"],
     "indent": [
       "warn",
       2,
@@ -103,8 +76,9 @@
     "key-spacing": [
       "warn",
       {
-        "beforeColon": false,
-        "afterColon": true
+        "beforeColon": true,
+        "afterColon": true,
+        "align": "colon"
       }
     ],
     "keyword-spacing": "warn",
@@ -214,15 +188,18 @@
         "avoidEscape": true
       }
     ],
+    "react/jsx-uses-react": 1,
+    "react/jsx-no-undef": 2,
+    "react/wrap-multilines": 2,
     "semi": ["error", "always"],
     "space-before-function-paren": [
       "warn",
       "never"
     ],
     "space-before-blocks" : [
-      "error", 
-      { 
-        "functions": "always", 
+      "error",
+      {
+        "functions": "always",
         "keywords": "always"
       }
     ],
