@@ -1,7 +1,7 @@
 {
   "vhosts": {
-    "ide.tom.local": 8080,
-    "optimus.local": 1233,
-    "tom.local": 1233
-  }
+    "default" : 1233,
+    "ide": 1233
+  },
+  "debugging" : true
 }

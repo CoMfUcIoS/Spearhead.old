@@ -1,12 +1,13 @@
 import express from 'express';
+import chimera    from '../chimera/index.js';
 
-
-var app = express();
+const { util }  = chimera.initialize(),
+    app = express();
 
 app.get('/', function(req, res) {
   res.sendFile('index.html', { root : __dirname });
 });
 
 app.listen(1233, function() {
-  console.log('Example app listening on port 1233!');
+  util.log('Example app listening on port 1233!');
 });
