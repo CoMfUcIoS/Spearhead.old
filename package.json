@@ -33,7 +33,9 @@
     "zongji": "^0.4.3"
   },
   "scripts": {
-    "start": "babel-node spearhead.js --debugging=true",
+    "start": "pm2 start spearhead.js  --interpreter 'babel-node' --watch true",
+    "kill" : "pm2 kill",
+    "list" : "pm2 l",
     "buildDocs": "yuidoc ./ -o docs"
   }
 }
