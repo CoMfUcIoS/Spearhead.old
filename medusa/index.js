@@ -2,15 +2,17 @@ import express from 'express';
 import chimera from '../chimera/index.js';
 
 const requires = [
-      'util'
+      'util',
+      'config'
     ],
-    { util }  = chimera.initialize(requires),
+    { util, config }  = chimera.initialize(requires),
+    port = config.get('ports.medusa'),
     app = express();
 
 app.get('/', function(req, res) {
   res.sendFile('index.html', { root : __dirname });
 });
 
-app.listen(1233, function() {
-  util.log('Medusa app listening on port 1233!');
+app.listen(port, function() {
+  util.log(`Medusa app listening on port ${port}!`);
 });

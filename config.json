@@ -1,7 +1,14 @@
 {
+  "ports" : {
+    "medusa" : 1233,
+    "cerberus" : 80,
+    "hydra" : 4730
+  },
   "vhosts": {
     "default" : 1233,
-    "ide": 1233
+    "cerberus" : 1233,
+    "medusa" : 1233,
+    "ws": 4730
   },
   "debug" : true
 }

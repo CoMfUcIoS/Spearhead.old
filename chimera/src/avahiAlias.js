@@ -65,7 +65,7 @@ const avahiAlias = function() {
       return;
     }
 
-    cname = `${cname}.${rootDomain}.local`;
+    cname = `${cname}.${rootDomain}`;
 
     service.getInterface(Avahi.DBUS_PATH_SERVER, Avahi.DBUS_INTERFACE_SERVER, function(error, server) {
       if (error) {

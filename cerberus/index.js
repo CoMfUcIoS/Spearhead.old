@@ -10,27 +10,29 @@ const requires = [
     { config, util, avahiAlias }  = chimera.initialize(requires),
     vhosts = config.get('vhosts'),
     proxy = httpProxy.createProxyServer({}),
-
+    port = config.get('ports.cerberus'),
     server = http.createServer((req, res) => {
-
-      const port = util.object.get(vhosts, req.headers.host.replace('/\.\w+\.\w+/g', '').toLowerCase(), vhosts['default']);
+      const appPort = util.object.get(vhosts, req.headers.host.replace(/\.\w+.\w+/g, '').toLowerCase(), vhosts['default']);
 
       proxy.on('error', function(e) {
         util.log(e);
       });
 
-      if (typeof port !== 'undefined') {
-        proxy.web(req, res, { target : 'http://127.0.0.1:' + port });
+      if (typeof appPort !== 'undefined') {
+        proxy.web(req, res, { target : 'http://127.0.0.1:' + appPort });
         return true;
       } else {
         return null;
       }
     });
 
-util.log('Cerberus is listening on port 80');
-server.listen(80);
+server.listen(port);
+util.log(`Cerberus is listening on port ${port}`);
 
-// Then publish all subdomains from vhost
-util.object.forOwn(vhosts, function(value, vhost) {
-  avahiAlias.publish(vhost);
-});
+// check debug to see if we are live or not to publish to avahi some aliases.
+if (config.get('debug')) {
+  // Then publish all subdomains from vhost
+  util.object.forOwn(vhosts, function(value, vhost) {
+    avahiAlias.publish(vhost);
+  });
+}
