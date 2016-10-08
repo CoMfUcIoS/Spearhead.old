@@ -1,16 +1,15 @@
 import http       from 'http';
 import httpProxy  from 'http-proxy';
-import os         from 'os';
-import alias      from './avahiAlias.js';
 import chimera    from '../chimera/index.js';
 
 const requires = [
       'util',
-      'config'
+      'config',
+      'avahiAlias'
     ],
-    { config, util }  = chimera.initialize(requires),
+    { config, util, avahiAlias }  = chimera.initialize(requires),
     vhosts = config.get('vhosts'),
-    rootDomain = `${os.hostname().toLowerCase()}.local`,
+    rootDomain = `${util.hostname().toLowerCase()}.local`,
     proxy = httpProxy.createProxyServer({}),
 
     server = http.createServer((req, res) => {
@@ -34,5 +33,5 @@ server.listen(80);
 
 // Then publish all subdomains from vhost
 util.object.forOwn(vhosts, function(value, vhost) {
-  alias.publish(`${vhost}.${rootDomain}`);
+  avahiAlias.publish(`${vhost}.${rootDomain}`);
 });

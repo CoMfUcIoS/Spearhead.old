@@ -6,7 +6,8 @@
  * @returns {Object} Module component
  */
 
-import _ from 'lodash';
+import _  from 'lodash';
+import os from 'os';
 
 
 const util = (function() {
@@ -290,6 +291,17 @@ const util = (function() {
      * @public
      */
     log : _log,
+
+    /**
+     * Returns operating system's hostname
+     *
+     * @method hostname
+     * @public
+     * @return {String} Hostname of the os.
+     */
+    hostname : function() {
+      return os.hostname();
+    },
 
     /**
      * Creates an array of numbers (positive and/or negative) progressing from start up to,
