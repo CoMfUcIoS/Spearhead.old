@@ -10,8 +10,7 @@ import _    from 'lodash';
 
 const framework = (function() {
 
-
-  var _modules   = {},
+  let _modules   = {},
       _neededMods;
 
   /*!``
