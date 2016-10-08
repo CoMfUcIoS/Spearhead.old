@@ -3,5 +3,5 @@
     "default" : 1233,
     "ide": 1233
   },
-  "debugging" : true
+  "debug" : true
 }

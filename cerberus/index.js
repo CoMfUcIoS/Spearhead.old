@@ -4,14 +4,18 @@ import os         from 'os';
 import alias      from './avahiAlias.js';
 import chimera    from '../chimera/index.js';
 
-const { config, util }  = chimera.initialize(),
+const requires = [
+      'util',
+      'config'
+    ],
+    { config, util }  = chimera.initialize(requires),
     vhosts = config.get('vhosts'),
     rootDomain = `${os.hostname().toLowerCase()}.local`,
     proxy = httpProxy.createProxyServer({}),
 
     server = http.createServer((req, res) => {
 
-      const port = util.object.get(vhosts, req.headers.host.replace('/\.\w+\.\w+/g', '').toLowerCase(), vhosts.default);
+      const port = util.object.get(vhosts, req.headers.host.replace('/\.\w+\.\w+/g', '').toLowerCase(), vhosts['default']);
 
       proxy.on('error', function(e) {
         util.log(e);

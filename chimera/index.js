@@ -4,15 +4,17 @@
  * @namespace framework
  */
 
-import fs from 'fs';
+import fs   from 'fs';
 import path from 'path';
+import _    from 'lodash';
 
 const framework = (function() {
 
 
-  var modules   = {};
+  var _modules   = {},
+      _neededMods;
 
-  /*!
+  /*!``
    * Fetches all the files in specified folder.
    *
    * @method _fetchFiles
@@ -24,7 +26,7 @@ const framework = (function() {
     fs.readdirSync(path.join(__dirname, folder))
       .filter(function(file) { return file.substr(-3) === '.js'; })
       .forEach(function(file) {
-        modules[file.replace(/\.[^/.]+$/, '')] = require(folder + file).default;
+        _modules[file.replace(/\.[^/.]+$/, '')] = folder + file;
       });
   }
 
@@ -37,14 +39,21 @@ const framework = (function() {
    */
   function initializeModule(mod) {
     mod.requires.forEach((required) => {
-      if (typeof modules[required] === 'function') {
-        modules[required] = modules[required]();
-        initializeModule(modules[required]);
+      //check if its in the mods array the user passed. if
+      //this array is empty then load everything.
+      if (_neededMods.length > 0 && _neededMods.indexOf(required) < 0) {
+        _neededMods.push(required);
+        _modules[required] = require(_modules[required])['default'];
+      }
+      console.log(required);
+      if (typeof _modules[required] === 'function') {
+        _modules[required] = _modules[required]();
+        initializeModule(_modules[required]);
       }
     });
 
     if (!mod.__initialized__) {
-      mod._init_(modules);
+      mod._init_(_modules);
       mod.__initialized__ = true;
     }
 
@@ -55,24 +64,47 @@ const framework = (function() {
      *
      * @method  initialize
      * @public
-     * @return {Object} Framework with its modules
+     * @param   {Array}   mods  Array with the modules we want to init
+     * @return  {Object}  Framework with its modules
      */
-    initialize : function() {
-        // Fetch services
+    initialize : function(mods) {
+      _neededMods = (Array.isArray(mods)) ? mods : [];
+
+      // Fetch services
       _fetchFiles('./src/services/');
-        // Fetch modules
+      // Fetch modules
       _fetchFiles('./src/');
 
-      Object.keys(modules).forEach((key) => {
-        if (typeof modules[key] === 'function') {
-          modules[key] = modules[key]();
-          initializeModule(modules[key]);
+      mods.forEach((mod) =>{
+        // load the file of required.
+        _modules[mod] = require(_modules[mod])['default'];
+      });
+
+      Object.keys(_modules).forEach((key) => {
+        //check if its in the mods array the user passed. if
+        //this array is empty then load everything.
+        if (_neededMods.length > 0 && _neededMods.indexOf(key) < 0) {
+          return;
+        }
+
+        if (typeof _modules[key] === 'function') {
+          _modules[key] = _modules[key]();
+          initializeModule(_modules[key]);
         }
       });
-      modules.__initialized__ = true;
+      _modules.__initialized__ = true;
 
-      modules.events.trigger('framework initialized');
-      return modules;
+      if (_modules && _modules.util && _modules.util.__initialized__) {
+        _modules = _modules.util.object.pick(_modules, _neededMods);
+      } else {
+        _modules = _.pick(_modules, _neededMods);
+      }
+
+      if (_modules && _modules.events && _modules.events.trigger) {
+        _modules.events.trigger('framework initialized');
+      }
+
+      return _modules;
     }
   };
 

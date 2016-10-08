@@ -1,7 +1,10 @@
 import express from 'express';
 import chimera from '../chimera/index.js';
 
-const { util }  = chimera.initialize(),
+const requires = [
+      'util'
+    ],
+    { util }  = chimera.initialize(requires),
     app = express();
 
 app.get('/', function(req, res) {
@@ -9,5 +12,5 @@ app.get('/', function(req, res) {
 });
 
 app.listen(1233, function() {
-  util.log('Example app listening on port 1233!');
+  util.log('Medusa app listening on port 1233!');
 });

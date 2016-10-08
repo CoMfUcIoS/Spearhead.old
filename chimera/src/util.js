@@ -6,15 +6,12 @@
  * @returns {Object} Module component
  */
 
-import loadGoogleMapsAPI from 'load-google-maps-api';
-import phpUnserialize    from 'phpunserialize';
-import _                 from 'lodash';
+import _ from 'lodash';
 
 
 const util = (function() {
   let _config,
-      _util,
-      _googleMapsLib;
+      _util;
 
   /*!
    * @see util.log
@@ -273,9 +270,6 @@ const util = (function() {
       _config = requires['config'];
       _util = this;
       /*eslint-enable dot-notation*/
-
-      //Fetch google Maps Library API
-      _util.googleMapsLib();
     },
 
     isEmpty : _isEmpty,
@@ -296,33 +290,6 @@ const util = (function() {
      * @public
      */
     log : _log,
-
-    /**
-     * Fetches and returns the google Maps api !
-     *
-     * @method googleMapsLib
-     * @public
-     * @return {Object} Google Map Api
-     */
-    googleMapsLib : function() {
-
-      if (!_googleMapsLib) {
-        loadGoogleMapsAPI({
-          v         : 3.25,
-          libraries : 'places,geometry,drawing',
-          key       : 'AIzaSyD9Y6jJXCsJtWDMvNIUObwMBhJVpbtX_pw' // That is IK's key. Needs a RepKnight API KEY
-        })
-        .then((googleMaps) => {
-          _googleMapsLib =  googleMaps;
-        })
-        .catch((err) => { // eslint-disable-line dot-notation
-          _log('util : googleMapsLib : We found a problem fetching googleMapsApi !');
-          _log(err);
-        });
-      }
-
-      return _googleMapsLib;
-    },
 
     /**
      * Creates an array of numbers (positive and/or negative) progressing from start up to,
@@ -697,25 +664,6 @@ const util = (function() {
      * @return {String}       The above variable type.
      */
     toType : _toType,
-
-    /**
-     * Fetches the user Token from ci_session cookie
-     *
-     * @method  getUserToken
-     * @public
-     * @return {String|null} User token as string or null if not found
-     */
-    getUserToken : function() {
-      const sessCookie = this.object.get(_getCookies(), 'ci_session', null);
-      let sessionObj;
-
-      if (sessCookie) {
-        sessionObj = phpUnserialize(sessCookie);
-        return this.object.get(sessionObj, 'token', null);
-      }
-
-      return null;
-    },
 
     /**
      * Fetches the csrf Token from csrf_repknight_cookie_name in the cookie

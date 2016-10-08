@@ -15,24 +15,18 @@ import bodyParser  from 'body-parser';
 
 const server = function() {
   let  _util,
-      _client,
       _config,
       _watch,
-      _storage,
-      $trends,
-      $traffic,
-      $querybuilder,
-      $config,
       _request,
 
       _app,
       _server,
-      _io,
-      _events;
+      _io;
 
   const _texts          = {},
       _clients          = {},
-      _listeningEvents  = {};
+      _listeningEvents  = {},
+      _modListeners     = [];
 
   /**
    * The server component
@@ -50,14 +44,7 @@ const server = function() {
     requires : [
       'util',
       'config',
-      'clients',
-      'events',
       'watch',
-      'storage',
-      '$trends',
-      '$traffic',
-      '$querybuilder',
-      '$config',
       '$request'
     ],
 
@@ -72,16 +59,17 @@ const server = function() {
       /*eslint-disable dot-notation*/
       _util    = requires['util'];
       _config  = requires['config'];
-      _client  = requires['clients'];
-      _events  = requires['events'];
       _watch   = requires['watch'];
-      _storage = requires['storage'];
-      $trends  = requires['$trends'];
-      $traffic = requires['$traffic'];
-      $querybuilder = requires['$querybuilder'];
-      $config  = requires['$config'];
       _request = requires['$request'];
       /*eslint-enable dot-notation*/
+
+      this.requires.forEach((mod) => {
+        const module = _util.object.get(requires, mod);
+        if (_util.toType(_util.object.get(module, 'listen')) === 'function') {
+          _modListeners.push(module);
+        }
+      });
+
     },
 
     /**
@@ -212,13 +200,6 @@ const server = function() {
           socket   : sckt
         };
 
-        _client.save(guid, {
-          sessionId : guid,
-          socketId  : sckt.id
-        }).fail((error) => {
-          _util.log('Error saving client with Guid: ' + guid, error);
-        });
-
 
         _self.events.on('host', (url) => {
           // sent API url
@@ -227,110 +208,8 @@ const server = function() {
           });
         });
 
-        /*
-         * TODO: IK : All this events must be moved to their modules
-         * and after initialization of framework will be registered
-         * here.
-         */
-        _self.events.on('getConfig', ({ uToken, timeout }) => {
-          _util.log('getConfig emitted uToken: ' + uToken);
-          $config.get({ uToken, timeout }).done((data) => {
-            _self.events.trigger(sckt.id, 'config', data);
-          })
-          .fail((err) => {
-            _util.log('$config : get : Failed: ' + uToken + ' err: ' + err);
-            _self.events.trigger(sckt.id, 'config', '{}');
-          });
-        });
-
-        _self.events.on('updateConfig', ({ uToken, config, timeout }) => {
-          _util.log('updateConfig emitted uToken: ' + uToken);
-          $config.update({ uToken, config, timeout }).done((saved) => {
-            _self.events.trigger(sckt.id, 'configUpdated', saved);
-          });
-        });
-
-        _self.events.on('getTrends', ({ uToken, type, tagId }) => {
-          $trends.get({ type : type, uToken : uToken, tagId : tagId })
-          .done((data) => {
-            data = (typeof data === 'string') ? JSON.parse(data) : data;
-            data.type = type;
-            _self.events.trigger(sckt.id, 'trendsData_' + type, data);
-          })
-          .fail(() => {
-            _util.log('Server : Event getTrends : Couldnt get ' + type + ' trends.');
-            _self.events.trigger(sckt.id, 'trendsData_' + type, null);
-          });
-        });
-
-        _self.events.on('getTags', ({ uToken }) => {
-          $traffic.getTags({
-            uToken : uToken
-          }).done(
-            (data) => {
-              data = (typeof data === 'string') ? JSON.parse(data) : data;
-              _self.events.trigger(sckt.id, 'gotTags', data);
-            })
-          .fail(() => {
-            _util.log('Server : Event getTags : Couldnt get company Tags.');
-
-          });
-        });
-
-        _self.events.on('getChart', ({ uToken, tagId, timeout }) => {
-          $traffic.get({ uToken, tagId, timeout }).done(
-            (data) => {
-              data = (typeof data === 'string') ? JSON.parse(data) : data;
-              _self.events.trigger(sckt.id, 'gotChart', data);
-            })
-          .fail(() => {
-            _util.log('Server : Event getCharts : Couldnt get chart data.');
-
-          });
-        });
-
-        _self.events.on('createQuerybuilderTag', ({ uToken, tag, timeout }) => {
-          $querybuilder.create({ uToken, tag, timeout }).done(
-            (data) => {
-              data = (typeof data === 'string') ? JSON.parse(data) : data;
-              _self.events.trigger(sckt.id, 'createdQuerybuilderTag', data);
-            })
-          .fail(() => {
-            _util.log('Server : Event createQuerybuilderTag : Couldnt create the Querybuilder Tag.');
-          });
-        });
-
-        _self.events.on('getQuerybuilderHistoricCount', ({ uToken, search, timeout }) => {
-          $querybuilder.getHistoricCount({ uToken, search, timeout }).done(
-            (data) => {
-              data = (typeof data === 'string') ? JSON.parse(data) : data;
-              _self.events.trigger(sckt.id, 'gotQuerybuilderHistoricCount', data);
-            })
-          .fail(() => {
-            _util.log('Server : Event getQuerybuilderHistoricCount : Couldnt get the Querybuilder Historic Count.');
-          });
-        });
-
-        _self.events.on('createQuerybuilderHistoricTag', ({ uToken, tag, timeout }) => {
-          $querybuilder.createHistoric({ uToken, tag, timeout }).done(
-            (data) => {
-              data = (typeof data === 'string') ? JSON.parse(data) : data;
-              _self.events.trigger(sckt.id, 'createdQuerybuilderHistoricTag', data);
-            })
-          .fail(() => {
-            _util.log('Server : Event createQuerybuilderHistoricTag : Couldnt create the Querybuilder Historic Tag.');
-          });
-        });
-
-        _self.events.on('updateQuerybuilderTag', ({ uToken, tag, timeout }) => {
-          $querybuilder.update({ uToken, tag, timeout }).done(
-            (data) => {
-              data = (typeof data === 'string') ? JSON.parse(data) : data;
-              _self.events.trigger(sckt.id, 'updatedQuerybuilderTag', data);
-            })
-          .fail(() => {
-            _util.log('Server : Event updateQuerybuilderTag : Couldnt update the Querybuilder Tag.');
-          });
+        _modListeners.forEach((mod) => {
+          mod.listen(sckt);
         });
 
         _util.log('Clients connected: ' + Object.keys(_clients).length);
@@ -341,8 +220,6 @@ const server = function() {
 
         _self.events.on('disconnect', () => {
           _util.log('Client with sessionID ' + guid + ' disconnected');
-          // delete our cache ( we might dont need it if we are using api calls!)
-          _client.remove(guid);
           delete _clients[guid];
           delete _texts[guid];
         });
@@ -354,6 +231,7 @@ const server = function() {
         }
       });
     },
+
     /**
      * Server's socket events
      *
