@@ -9,7 +9,6 @@ const requires = [
     ],
     { config, util, avahiAlias }  = chimera.initialize(requires),
     vhosts = config.get('vhosts'),
-    rootDomain = `${util.hostname().toLowerCase()}.local`,
     proxy = httpProxy.createProxyServer({}),
 
     server = http.createServer((req, res) => {
@@ -33,5 +32,5 @@ server.listen(80);
 
 // Then publish all subdomains from vhost
 util.object.forOwn(vhosts, function(value, vhost) {
-  avahiAlias.publish(`${vhost}.${rootDomain}`);
+  avahiAlias.publish(vhost);
 });

@@ -45,7 +45,6 @@ const framework = (function() {
         _neededMods.push(required);
         _modules[required] = require(_modules[required])['default'];
       }
-      console.log(required);
       if (typeof _modules[required] === 'function') {
         _modules[required] = _modules[required]();
         initializeModule(_modules[required]);

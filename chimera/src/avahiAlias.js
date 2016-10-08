@@ -54,7 +54,19 @@ const avahiAlias = function() {
   }
 
   function _publish(cname) {
-    var service = _bus.getService(Avahi.DBUS_NAME);
+    if (cname === 'default') {
+      return;
+    }
+
+    const rootDomain = `${_util.hostname().toLowerCase()}.local`,
+        service = _bus.getService(Avahi.DBUS_NAME);
+
+    if (rootDomain === '.local') {
+      return;
+    }
+
+    cname = `${cname}.${rootDomain}.local`;
+
     service.getInterface(Avahi.DBUS_PATH_SERVER, Avahi.DBUS_INTERFACE_SERVER, function(error, server) {
       if (error) {
         _throwError({ message : 'Error in getInterface', error });
@@ -69,7 +81,7 @@ const avahiAlias = function() {
             _throwError({ message : 'Error in getObject', error : err });
           }
 
-          var group = obj.as(Avahi.DBUS_INTERFACE_ENTRY_GROUP);
+          const group = obj.as(Avahi.DBUS_INTERFACE_ENTRY_GROUP);
           server.GetHostNameFqdn(function(er, rdata) { //eslint-disable-line
             if (er) {
               _throwError({ message : 'Error in GetHostNameFqdn', error : er });
