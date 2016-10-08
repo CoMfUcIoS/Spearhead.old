@@ -3,24 +3,48 @@
  * @submodule util
  * @namespace framework
  *
- * @return {Object} Module component
+ * @returns {Object} Module component
  */
-const util = function() {
 
-  let _config;
+import loadGoogleMapsAPI from 'load-google-maps-api';
+import phpUnserialize    from 'phpunserialize';
+import _                 from 'lodash';
+
+
+const util = (function() {
+  let _config,
+      _util,
+      _googleMapsLib;
 
   /*!
    * @see util.log
    */
   function _log(/* Something to log goes here */) {
-    if (_config.get('debugging')) {
-      const args = Array.prototype.slice.call(arguments);
+    if (_config.get('debug')) {
+      var args = Array.prototype.slice.call(arguments);
       /*eslint-disable no-console*/
-      if (!_config.get('unitTests')) { // For not logging in our unit tests
+      if (typeof console.log === 'function') { // This is added because jest tests uses console.warn with nodejs
         console.log.apply(console, args);
         console.log('============================================================');
-        /*eslint-enable no-console*/
       }
+      /*eslint-enable no-console*/
+    }
+  }
+
+  /*!
+   * @see util.toType
+   */
+  function _toType(variable) {
+    if (variable === null) {
+      return 'null';
+    } else if (typeof variable === 'object') {
+      if (Array.isArray(variable)) {
+        return 'array';
+      } else {
+        return 'object';
+      }
+    } else {
+      return typeof variable;
     }
   }
 
@@ -28,7 +52,7 @@ const util = function() {
    * @see util.object.sanity
    */
   function _checkSanity(obj, expected) {
-    let sanity    = true,
+    var sanity    = true,
         mandatory = 0,
         objKeys;
 
@@ -37,7 +61,7 @@ const util = function() {
       return false;
     }
 
-    Object.keys(expected).forEach((key) => {
+    Object.keys(expected).forEach(function(key) {
       if (_objectGet(expected[key], 'mandatory', false)) {
         mandatory++;
       }
@@ -54,9 +78,9 @@ const util = function() {
       return false;
     }
 
-    objKeys.forEach((key) => {
+    objKeys.forEach(function(key) {
       var expectedKey = _objectGet(expected, key, null),
-          type = _objectGet(expectedKey, 'type', null),
+          type        = _objectGet(expectedKey, 'type', null),
           isMandatory = _objectGet(expectedKey, 'mandatory', false);
 
       if (!isMandatory) {
@@ -71,19 +95,74 @@ const util = function() {
   }
 
   /*!
-   * Checks if an object is empty
+   * Gets the first element of array.
+   *
+   * @method head
+   * @private
+   * @param   {Array}   array   The array to query.
+   * @return  {*}               Returns the first element of array.
+   */
+  function _head(array) {
+    if (_toType(array) === 'array') {
+      return array[0];
+    }
+    return undefined;
+  }
+
+
+  /*!
+   * Checks if a value is empty
    *
    * @method  _isEmpty
    * @private
-   * @param  {Object}  obj The object to be checked
+   * @param  {*}  value    The value we want to check
    * @return {Boolean}     True if it is empty, false otherwise
    */
-  function _isEmpty(obj) {
-    if (typeof obj !== 'object') {
-      _log('framework : util : _isEmpty : Parameter is not an object');
+  function _isEmpty(value) {
+    const type = _toType(value);
+    if (type === 'object') {
+      return Object.keys(value).length === 0 && value.constructor === Object;
+    } else if (type === 'array' || type === 'string') {
+      return !(value.length > 0);
+    } else if (type === 'undefined' || type === 'null') {
       return true;
     }
-    return (Object.keys(obj).length === 0 && obj.constructor === Object);
+
+    return true;
+  }
+
+  /*!
+   * Deep search inside an object
+   *
+   * @method  _objectGet
+   * @private
+   * @param  {Object}   obj           Object to search
+   * @param  {String}   path          Desired path
+   * @param  {*}        defaultValue  Default value if path is not defined
+   * @param  {Boolean}  [execute]     Executes the value if it is a function.
+   * @param  {String}   [delimiter]   Path delimiter. If it is different than .
+   *                                  then you must specify it here
+   * @return {*}                      Value found on that Path or
+   *                                  default value specified. or undefined.
+   */
+  /*eslint-disable max-params*/
+  function _objectGet(obj, path, defaultValue, execute, delimiter) {
+  /*eslint-enable max-params*/
+    let arr,
+        i;
+    if (typeof path === 'string') {
+      arr = path.split(delimiter || '.');
+      for (i = 0; i < arr.length; i++) {
+        if (obj && (obj.hasOwnProperty(arr[i]) || obj[arr[i]])) {
+          obj = obj[arr[i]];
+        } else {
+          return defaultValue;
+        }
+      }
+      return (execute && _toType(obj) === 'function') ? obj() : obj;
+    } else {
+      return defaultValue;
+    }
   }
 
   /*!
@@ -93,7 +172,7 @@ const util = function() {
    * @private
    * @param  {Object} obj   Object we want to add a path and a value
    * @param  {String} path  The path
-   * @param  {[type]} value The value
+   * @param  {*}      value The value
    */
   function _objectSet(obj, path, value) {
     //const [obj, path, value] = Array.prototype.slice.call(arguments);
@@ -116,37 +195,53 @@ const util = function() {
   }
 
   /*!
-   * Deep search inside an object
+   * Fetches the cookies from the browser and returns them as an array
    *
-   * @method  _objectGet
+   * @method _getCookies
    * @private
-   * @param  {Object} obj          Object to search
-   * @param  {String} path         Desired path
-   * @param  {Any}    defaultValue Default value if path is not defined
-   * @param  {String} delimiter    Path delimiter. If it is different than .
-   *                               then you must specify it here
-   * @return {Any}                   Value found on that Path or
-   *                               default value specified. or undefined.
+   * @return {Object} Object containing our cookies.
    */
-  /*eslint-disable max-params*/
-  function _objectGet() {
-  /*eslint-enable max-params*/
-    let [obj, path, defaultValue, delimiter] = Array.prototype.slice.call(arguments),
-        arr,
-        i;
-    if (typeof path === 'string') {
-      arr = path.split(delimiter || '.');
-      for (i = 0; i < arr.length; i++) {
-        if (obj && (obj.hasOwnProperty(arr[i]) || obj[arr[i]])) {
-          obj = obj[arr[i]];
-        } else {
-          return defaultValue;
-        }
-      }
-      return obj;
-    } else {
-      return defaultValue;
+  function _getCookies() {
+    const cookies = {};
+    let c = document.cookie,
+        v = 0;
+
+    if (document.cookie.match(/^\s*\$Version=(?:"1"|1);\s*(.*)/)) {
+      c = RegExp.$1;
+      v = 1;
     }
+    if (v === 0) {
+      c.split(/[,;]/).map((cookie) => {
+        const parts = cookie.split(/=/, 2),
+            name    = decodeURIComponent(parts[0].trimLeft()),
+            value   = (parts.length > 1) ? decodeURIComponent(parts[1].trimRight()) : null;
+        cookies[name] = value;
+        return true;
+      });
+    } else {
+      c.match(/(?:^|\s+)([!#$%&'*+\-.0-9A-Z^`a-z|~]+)=([!#$%&'*+\-.0-9A-Z^`a-z|~]*|"(?:[\x20-\x7E\x80\xFF]|\\[\x00-\x7F])*")(?=\s*[,;]|$)/g).map(($0, $1) => {
+        const name = $0,
+            value  = ($1.charAt(0) === '"') ? $1.substr(1, -1).replace(/\\(.)/g, '$1') : $1;
+        cookies[name] = value;
+        return true;
+      });
+    }
+    return cookies;
+  }
+
+  /*!
+   * Iterates over elements of collection and invokes iteratee for each element.
+   * The iteratee is invoked with three arguments: (value, index|key, collection).
+   * Iteratee functions may exit iteration early by explicitly returning false.
+   *
+   * @method _each
+   * @private
+   * @param    {Array|Object}  collection  The collection to iterate over.
+   * @param   {Function}      [iteratee]  The function invoked per iteration.
+   * @return  {*}                         Returns collection.
+   */
+  function _each() {
+    return _.each.apply(_util, arguments);
   }
 
   /**
@@ -176,8 +271,23 @@ const util = function() {
     _init_ : function(requires) {
       /*eslint-disable dot-notation*/
       _config = requires['config'];
+      _util = this;
       /*eslint-enable dot-notation*/
+
+      //Fetch google Maps Library API
+      _util.googleMapsLib();
     },
+
+    isEmpty : _isEmpty,
+
+
+    /**
+     * This returns undefined.
+     *
+     * @variable noop
+     * @static
+     */
+    noop : undefined,
 
     /**
      * This function is use to log to the console.
@@ -188,6 +298,397 @@ const util = function() {
     log : _log,
 
     /**
+     * Fetches and returns the google Maps api !
+     *
+     * @method googleMapsLib
+     * @public
+     * @return {Object} Google Map Api
+     */
+    googleMapsLib : function() {
+
+      if (!_googleMapsLib) {
+        loadGoogleMapsAPI({
+          v         : 3.25,
+          libraries : 'places,geometry,drawing',
+          key       : 'AIzaSyD9Y6jJXCsJtWDMvNIUObwMBhJVpbtX_pw' // That is IK's key. Needs a RepKnight API KEY
+        })
+        .then((googleMaps) => {
+          _googleMapsLib =  googleMaps;
+        })
+        .catch((err) => { // eslint-disable-line dot-notation
+          _log('util : googleMapsLib : We found a problem fetching googleMapsApi !');
+          _log(err);
+        });
+      }
+
+      return _googleMapsLib;
+    },
+
+    /**
+     * Creates an array of numbers (positive and/or negative) progressing from start up to,
+     * but not including, end. A step of -1 is used if a negative start is specified without
+     * an end or step. If end is not specified, it's set to start with start then set to 0.
+     *
+     * @method range
+     * @public
+     * @param {Number} [start]  The start of the range.
+     * @param {Number} end      The end of the range.
+     * @param {Number} [step]   The value to increment or decrement by.
+     * @return {Array}          Returns the range of numbers.
+     */
+    range : function() {
+      return _.range.apply(this, arguments);
+    },
+
+    /**
+     * This method returns the first argument it receives.
+     *
+     * @method  identity
+     * @public
+     * @param {*} value Any value
+     * @return {*} Value
+     */
+    identity : function() {
+      return _.identity.apply(this, arguments);
+    },
+
+    /**
+     * Creates a debounced function that delays invoking func until after wait
+     * milliseconds have elapsed since the last time the debounced function was invoked.
+     * The debounced function comes with a cancel method to cancel delayed func invocations
+     * and a flush method to immediately invoke them. Provide options to indicate whether
+     * func should be invoked on the leading and/or trailing edge of the wait timeout.
+     * The func is invoked with the last arguments provided to the debounced function.
+     * Subsequent calls to the debounced function return the result of the last func invocation.
+     *
+     * @method debounce
+     * @public
+     * @param {Function} func                 The function to debounce.
+     * @param  {Number}  [wait]               The number of milliseconds to delay.
+     * @param {Object}   [options]            The options object.
+     *   @param {Boolean} [options.leading]   Specify invoking on the leading edge of the timeout.
+     *   @param {Number}  [options.maxWait]   The maximum time func is allowed to be delayed before it's invoked.
+     *   @param {Boolean} [options.trailing]  Specify invoking on the trailing edge of the timeout.
+     * @return {Function}                     Returns the new debounced function.
+     */
+    debounce : function() {
+      return _.debounce.apply(this, arguments);
+    },
+
+    /**
+     * Iterates over elements of collection and invokes iteratee for each element.
+     * The iteratee is invoked with three arguments: (value, index|key, collection).
+     * Iteratee functions may exit iteration early by explicitly returning false.
+     *
+     * @method forEach
+     * @private
+     * @param    {Array|Object}  collection  The collection to iterate over.
+     * @param   {Function}      [iteratee]  The function invoked per iteration.
+     * @return  {*}                         Returns collection.
+     */
+    forEach : _each,
+
+    /**
+     * Iterates over elements of collection and invokes iteratee for each element.
+     * The iteratee is invoked with three arguments: (value, index|key, collection).
+     * Iteratee functions may exit iteration early by explicitly returning false.
+     *
+     * @method each
+     * @private
+     * @param    {Array|Object}  collection  The collection to iterate over.
+     * @param   {Function}      [iteratee]  The function invoked per iteration.
+     * @return  {*}                         Returns collection.
+     */
+    each : _each,
+
+    /**
+     * Checks if predicate returns truthy for all elements of collection.
+     * Iteration is stopped once predicate returns falsey. The predicate
+     * is invoked with three arguments: (value, index|key, collection).
+     *
+     * @method every
+     * @public
+     * @param {Array|Object} collection The collection to iterate over.
+     * @param {Function} [predicate] The function invoked per iteration.
+     * @return {Boolean} Returns true if all elements pass the predicate check, else false.
+     */
+    every : function() {
+      return _.every.apply(this, arguments);
+    },
+
+    /**
+     * Creates a function that invokes func with partials prepended to the arguments
+     * it receives. This method is like _.bind except it does not alter the this binding.
+     *
+     * @method  partial
+     * @public
+     * @param   {Function}  func        The function to partially apply arguments to.
+     * @params  {...*}      partials]   The arguments to be partially applied.
+     * @return  {Function}              Returns the new partially applied function.
+     */
+    partial : function() {
+      return _.partial.apply(this, arguments);
+    },
+
+    /**
+     * Checks if value is null.
+     *
+     * @method isNull
+     * @public
+     * @param  {*}        value The value to check
+     * @return {Boolean}        Returns true if value is null, else false.
+     */
+    isNull : function(value) {
+      return (_toType(value) === 'null');
+    },
+
+    /**
+     * Defers invoking the func until the current call stack has cleared. Any additional
+     * arguments are provided to func when it's invoked.
+     *
+     * @method defer
+     * @public
+     * @param  {Function} func   The function to defer.
+     * @params {...*}    [args] The arguments to invoke func with.
+     * @return {Number}  Returns the timer id.
+     */
+    defer : function() {
+      return _.defer.apply(this, arguments);
+    },
+
+    /**
+     * Performs a deep comparison between each element in collection and
+     * the source object, returning the first element that has equivalent
+     * property values.
+     *
+     * @method findWhere
+     * @public
+     * @param  {Array|Object|String}  collection  The collection to search.
+     * @param  {Object}               source      The object of property values to match.
+     * @return {*}                                Returns the matched element, else undefined.
+     */
+    findWhere : function(collection, source) {
+      return this.find(collection, (n) => {
+        if (this.matches(source)(n)) {
+          return n;
+        }
+        return false;
+      });
+    },
+
+    /**
+     * Creates a function that performs a partial deep comparison between a
+     * given object and source, returning true if the given object has equivalent
+     * property values, else false.
+     *
+     * @method matches
+     * @public
+     * @param   {Object}    source  The object of property values to match.
+     * @return  {Function}          Returns the new spec function.
+     */
+    matches : function() {
+      return _.matches.apply(this, arguments);
+    },
+
+    /**
+     * Iterates over elements of collection, returning the first element predicate
+     * returns truthy for. The predicate is invoked with three arguments:
+     * (value, index|key, collection).
+     *
+     * @method  find
+     * @public
+     * @param   {Array|Object}  collection  The collection to inspect.
+     * @param   {Function}      [predicate] The function invoked per iteration.
+     * @param   {Number}        [fromIndex] The index to search from.
+     * @return  {*}                         Returns the matched element, else undefined.
+     */
+    find : function() {
+      return _.find.apply(this, arguments);
+    },
+
+    /**
+     * Checks if value is classified as a String primitive or object.
+     *
+     * @method isString
+     * @public
+     * @param  {*}       value  The value to check.
+     * @return {Boolean}        Returns true if value is a string, else false.
+     */
+    isString : function(value) {
+      return (_toType(value) === 'string');
+    },
+
+    /**
+     * Creates a shallow clone of value.
+     *
+     * @method clone
+     * @public
+     * @param {*}   value   The value to clone.
+     * @return {*}          Returns the cloned value.
+     */
+    clone : function() {
+      return _.clone.apply(this, arguments);
+    },
+
+    /**
+     * Checks if predicate returns truthy for any element of collection. Iteration is stopped once predicate
+     * returns truthy. The predicate is invoked with three arguments: (value, index|key, collection).
+     *
+     * @method  some
+     * @public
+     * @param {Array|Object} collection   The collection to iterate over.
+     * @param {Function}     [predicate]  The function invoked per iteration.
+     * @return {Boolean}                  Returns true if any element passes the predicate check, else false.
+     */
+    some : function() {
+      return _.some.apply(this, arguments);
+    },
+
+    /**
+     * Reduces collection to a value which is the accumulated result of running each element in collection thru iteratee,
+     * where each successive invocation is supplied the return value of the previous. If accumulator is not given,
+     * the first element of collection is used as the initial value. The iteratee is invoked with four arguments:
+     * (accumulator, value, index|key, collection).
+     *
+     * @method  reduce
+     * @public
+     * @param {Array|Object} collection      The collection to iterate over.
+     * @param {Function}     [iteratee]      The function invoked per iteration.
+     * @param {*}            [accumulator]   The initial value.
+     * @return {*}                           Returns the accumulated value.
+     */
+    reduce : function() {
+      return _.reduce.apply(this, arguments);
+    },
+
+    /**
+     * Checks if value is in collection. If collection is a string,
+     * it’s checked for a substring of value, otherwise SameValueZero is
+     * used for equality comparisons. If fromIndex is negative, it’s used as
+     * the offset from the end of collection.
+     *
+     * @method  includes
+     * @public
+     * @param  {Array|Object|String}  collection    The collection to inspect.
+     * @param  {*}                    value         The value to search for.
+     * @param  {Number}               [fromIndex]   The index to search from.
+     * @return {Boolean}                            Returns true if value is found, else false.
+     */
+    includes : function() {
+      return _.includes.apply(this, arguments);
+    },
+
+    /**
+     * This method returns the elements of collection that predicate does not return truthy for.
+     *
+     * @method  reject
+     * @public
+     * @param {Array|Object} collection   The collection to iterate over.
+     * @param {Function}     [predicate]  The function invoked per iteration. [description]
+     * @return {Array}                    Returns the new filtered array.
+     */
+    reject : function() {
+      return _.reject.apply(this, arguments);
+    },
+
+    /**
+     * Performs a deep comparison between two values to determine if they are equivalent.
+     * This method supports comparing arrays, array buffers, booleans, date objects,
+     * error objects, maps, numbers, Object objects, regexes, sets, strings, symbols,
+     * and typed arrays. Object objects are compared by their own, not inherited, enumerable
+     * properties. Functions and DOM nodes are not supported.
+     *
+     * @method isEqual
+     * @public
+     * @param {*}        value  The value to compare.
+     * @param {*}        other  The other value to compare.
+     * @return {Boolean}        Returns true if the values are equivalent, else false.
+     */
+    isEqual : function() {
+      return _.isEqual.apply(this, arguments);
+    },
+
+    /**
+     * Creates an array of values by running each element in collection thru iteratee.
+     * The iteratee is invoked with three arguments: (value, index|key, collection).
+     *
+     * @method map
+     * @pubic
+     * @param {Array|Object} collection  The collection to iterate over.
+     * @param {Function}     [iteratee]  The function invoked per iteration.
+     * @return {Array}                   Returns the new mapped array.
+     */
+    map : function() {
+      return _.map.apply(this, arguments);
+    },
+
+    /**
+     * Iterates over elements of collection, returning an array of all elements predicate
+     * returns truthy for. The predicate is invoked with three arguments: (value, index|key, collection).
+     *
+     * @method  filter
+     * @public
+     * @param   {Array|Object} collection   The collection to iterate over.
+     * @param   {Function}     [predicate]  The function invoked per iteration.
+     * @return  {Array}                     Returns the new filtered array.
+     */
+    filter : function() {
+      return _.filter.apply(this, arguments);
+    },
+
+    /**
+     * Checks if value is undefined.
+     *
+     * @method isUndefined
+     * @public
+     * @param  {*}       value   The value to check.
+     * @return {Boolean}         Returns true if value is undefined, else false.
+     */
+    isUndefined : function(value) {
+      return (this.toType(value) === 'undefined');
+    },
+
+    /**
+     * Checks if value is classified as a Function object.
+     *
+     * @method isFunction
+     * @public
+     * @param  {*}        value The value to check
+     * @return {Boolean}        Returns true if value is a function, else false.
+     */
+    isFunction : function(value) {
+      return (_toType(value) === 'function');
+    },
+
+    /**
+     * Checks if value is classified as a Number primitive or object.
+     *
+     * @method isNumber
+     * @public
+     * @param  {*}        value The value to check
+     * @return {Boolean}        Returns true if value is a number, else false.
+     */
+    isNumber : function(value) {
+      return (_toType(value) === 'number');
+    },
+
+    /**
+     * Escapes html from jsx files
+     *
+     * @method escapeHTML
+     * @public
+     * @param  {String} jsx Jsx string
+     * @return {String}     Escaped string
+     */
+    escapeHTML : function(jsx) {
+      return jsx.replace(/&/g, '&amp;')
+      .replace(/</g, '&#60;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+    },
+
+    /**
      * Returns the type of the variable
      *
      * @method toType
@@ -195,44 +696,322 @@ const util = function() {
      * @param  {Any} variable Variable we want to check its type
      * @return {String}       The above variable type.
      */
-    toType : function(variable) {
-      if (variable === null) {
-        return 'null';
-      } else {
-        return typeof variable;
+    toType : _toType,
+
+    /**
+     * Fetches the user Token from ci_session cookie
+     *
+     * @method  getUserToken
+     * @public
+     * @return {String|null} User token as string or null if not found
+     */
+    getUserToken : function() {
+      const sessCookie = this.object.get(_getCookies(), 'ci_session', null);
+      let sessionObj;
+
+      if (sessCookie) {
+        sessionObj = phpUnserialize(sessCookie);
+        return this.object.get(sessionObj, 'token', null);
       }
+
+      return null;
     },
 
     /**
-     * Creates a unique guid to use it for client matching.
+     * Fetches the csrf Token from csrf_repknight_cookie_name in the cookie
      *
-     * @method  guid
+     * @method  getCSRFToken
      * @public
-     * @param  {Array}  clients Array with the already defined clients.
-     * @return {String}         Unique Guid.
+     * @return {String|null} Csrf token as string or null if not found
      */
-    guid : function guid(clients) {
-      const uid = s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    getCSRFToken : function() {
+      return this.object.get(_getCookies(), 'csrf_repknight_cookie_name', null);
+    },
 
-      /*!
-       * Creates a random alphanumeric string
+    /**
+     * The util.array component
+     *
+     * @class util.array
+     */
+    array : {
+
+      /**
+       * Computes the minimum value of array. If array is empty or falsey, undefined is returned.
        *
-       * @method s4
-       * @private
-       * @return {String} A random alphanumeric
+       * @method min
+       * @public
+       * @param {Array} array The array to iterate over.
+       * @return {*}          Returns the minimum value.
        */
-      function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-              .toString(16)
-              .substring(1);
-      }
+      min : function() {
+        return _.min.apply(this, arguments);
+      },
 
-      if (_objectGet(clients, uid, null)) {
-        return this.guid(clients);
-      } else {
-        return uid;
+      /**
+       * Computes the maximum value of array. If array is empty or falsey, undefined is returned.
+       *
+       * @method max
+       * @public
+       * @param {Array} array The array to iterate over.
+       * @return {*} Returns the maximum value.
+       */
+      max : function() {
+        return _.max.apply(this, arguments);
+      },
+
+      /**
+       * Creates an array of grouped elements, the first of which contains
+       * the first elements of the given arrays, the second of which contains
+       * the second elements of the given arrays, and so on.
+       *
+       * @method zip
+       * @public
+       * @params {...Arrays} arrays The arrays to process.
+       * @return {Array}            Returns the new array of grouped elements.
+       */
+      zip : function() {
+        return _.zip.apply(this, arguments);
+      },
+
+      /**
+       * Creates a slice of array with n elements dropped from the beginning.
+       *
+       * @method drop
+       * @public
+       * @param   {Array}   array The array to query.
+       * @param   {Number}  [n]   The number of elements to drop.
+       * @return  {Array}         Returns the slice of array.
+       */
+      drop : function() {
+        return _.drop.apply(this, arguments);
+      },
+
+      /**
+       * Gets the first element of array.
+       *
+       * @method head
+       * @public
+       * @param   {Array}   array   The array to query.
+       * @param   {Number}  [n]     The number of elements to take.
+       * @return  {*}               Returns the first element of array.
+       */
+      head : _head,
+
+      /**
+       * Gets the first element of array.
+       *
+       * @method first
+       * @public
+       * @param   {Array}   array   The array to query.
+       * @param   {Number}  [n]     The number of elements to take.
+       * @return  {*}               Returns the first element of array.
+       */
+      first : _head,
+
+      /**
+       * Gets the last element of array
+       *
+       * @method last
+       * @public
+       * @param   {Array}   array  The array to query.
+       * @param   {Number}  [n]    The number of elements to take.
+       * @return {*}               Returns the last element of array.
+       */
+      last : function(array) {
+        if (_toType(array) === 'array') {
+          return array[array.length - 1];
+        }
+        return undefined;
+      },
+
+      /**
+       * Creates a slice of array with n elements taken from the end.
+       *
+       * @method takeRight
+       * @public
+       * @param   {Array}   array  The array to query.
+       * @param   {Number}  [n]    The number of elements to take.
+       * @return {*}               Returns the slice of array.
+       */
+      takeRight : function() {
+        return _.takeRight(this, arguments);
+      },
+
+      /**
+       * Creates a slice of array with n elements taken from the beginning.
+       *
+       * @method take
+       * @public
+       * @param   {Array}   array  The array to query.
+       * @param   {Number}  [n]    The number of elements to take.
+       * @return {*}               Returns the slice of array.
+       */
+      take : function() {
+        return _.take(this, arguments);
+      },
+
+      /**
+       * Flattens array a single level deep.
+       *
+       * @method flatten
+       * @public
+       * @param  {Array}  array   The array to flatten.
+       * @return {Array}          Returns the new flattened array.
+       */
+      flatten : function() {
+        return _.flatten.apply(this, arguments);
+      },
+
+      /**
+       * Creates a duplicate-free version of an array, using SameValueZero
+       * for equality comparisons, in which only the first occurrence of each element is kept.
+       *
+       * @method uniq
+       * @public
+       * @param   {Array}   array   The array to inspect.
+       * @return  {Array}          Returns the new duplicate free array.
+       */
+      uniq : function() {
+        return _.uniq.apply(this, arguments);
+      },
+
+      /**
+       * This method returns the index of the first element predicate returns truthy for instead of the element itself.
+       *
+       * @method findIndex
+       * @public
+       * @param   {Array}     array         The array to inspect.
+       * @param   {Function}  [predicate]   The function invoked per iteration.
+       * @param   {Number}    [fromIndex]   The index to search from.
+       * @return  {Number}                 Returns the index of the found element, else -1.
+       */
+      findIndex : function() {
+        return _.findIndex.apply(this, arguments);
+      },
+
+      /**
+       * Creates an array of elements, sorted in ascending order by the results of running
+       * each element in a collection thru each iteratee. This method performs a stable sort,
+       * that is, it preserves the original sort order of equal elements. The iteratees are
+       * invoked with one argument: (value).
+       *
+       * @method  sortBy
+       * @public
+       * @param   {Array|Object}        collection    The collection to iterate over.
+       * @param   {Function|Function[]} [iteratees]   The iteratees to sort by.
+       * @return  {Array}                            Returns the new sorted array.
+       */
+      sortBy : function() {
+        return _.sortBy.apply(this, arguments);
+      },
+
+      /**
+       * Gets the index at which the first occurrence of value is found in array
+       *
+       * @method  indexOf
+       * @public
+       * @param  {Array}  array  The array to inspect.
+       * @param  {*}      value  The value to search for.
+       * @return {Number}         Returns the index of the matched value, else -1.
+       */
+      indexOf : function(array, value) {
+        if (!this.isArray(array)) {
+          _log('util : array : indexOf : Variable passed in is not an Array, aborting...');
+          return -1;
+        }
+        return array.indexOf(value);
+      },
+
+      /**
+       * Creates an array of unique values that are included in all given arrays
+       * using SameValueZero for equality comparisons. The order of result values
+       * is determined by the order they occur in the first array.
+       *
+       * @method  intersection
+       * @public
+       * @params  {Arrays} ..Arrays  The arrays to inspect.
+       * @return  {Array}            Returns the new array of intersecting values.
+       */
+      intersection : function() {
+        return _.intersection.apply(this, arguments);
+      },
+
+      /**
+       * Checks if value is classified as an Array object.
+       *
+       * @method  isArray
+       * @public
+       * @param  {*}        value   The value to check.
+       * @return {Boolean}          Returns true if value is an array, else false.
+       */
+      isArray : function() {
+        return _.isArray.apply(this, arguments);
+      },
+
+      /**
+       * Moves an array element to the index specified
+       *
+       * @method  move
+       * @public
+       * @param  {Array}  array    Array we want to change
+       * @param  {Number} oldIndex Old index the element lives
+       * @param  {Number} newIndex The new index we want to the element to be
+       */
+      move : function(array, oldIndex, newIndex) {
+        let k;
+
+        if (newIndex >= array.length) {
+          k = newIndex - array.length;
+          while ((k--) + 1) {
+            array.push(undefined);
+          }
+        }
+        array.splice(newIndex, 0, array.splice(oldIndex, 1)[0]);
+      },
+
+      /**
+       * Searches an Array of objects for a value in a specific key
+       *
+       * @method search
+       * @public
+       * @param  {String}       field   Field we want to search
+       * @param  {Array}        array   Array of Objects we want to search
+       * @param  {String}       value   Value we are searching for
+       * @return {Object|null}          The object we found that contains the value in its key
+       */
+      search : function(field, array, value) {
+        if (!Array.isArray(array)) {
+          return false;
+        }
+        const l = array.length;
+        let i,
+            found = null;
+        for (i = 0; i < l; i++) {
+          if (array[i][field] === value) {
+            found = array[i];
+          }
+        }
+
+        return found;
+      },
+
+      /**
+       * Checks 2 arrays if are equls
+       *
+       * @method areEquals
+       * @public
+       * @param  {Array}    arr1   Array 1 we want to check
+       * @param  {Array}    arr2   Array 2 we want to check
+       * @return {Boolean}         True if equal, false otherwise
+       */
+      areEquals(arr1, arr2) {
+        if (!Array.isArray(arr1) || !Array.isArray(arr2)) {
+          return false;
+        }
+        return JSON.stringify(arr1) === JSON.stringify(arr2);
       }
     },
+
     date : {
       formatForChart : function(timestamp) {
         if (!timestamp || isNaN(timestamp)) {
@@ -254,6 +1033,60 @@ const util = function() {
      * @class util.object
      */
     object : {
+
+      /**
+       * Iterates over own enumerable string keyed properties of an object and invokes iteratee for each property.
+       * The iteratee is invoked with three arguments: (value, key, object).
+       * Iteratee functions may exit iteration early by explicitly returning false.
+       *
+       * @method forOwn
+       * @public
+       * @param {Object}   object     The object to iterate over.
+       * @param {Function} iteratee   The function invoked per iteration.
+       * @return {Object}             object.
+       */
+      forOwn : function() {
+        return _.forOwn.apply(this, arguments);
+      },
+
+      /**
+       * Creates an array of the own enumerable string keyed property values of object.
+       *
+       * @method values
+       * @public
+       * @param   {Object} object   The object to query.
+       * @return  {Array}           Returns the array of property values.
+       */
+      values : function() {
+        return _.values.apply(this, arguments);
+      },
+
+      /**
+       * Creates an object composed of the picked object properties.
+       *
+       * @method pick
+       * @public
+       * @param  {Object}                object   The source object.
+       * @param  {...(string|string[])}  [props]  The property identifiers to pick.
+       * @return {Object}                         Returns the new object.
+       */
+      pick : function() {
+        return _.pick.apply(this, arguments);
+      },
+
+      /**
+       * This method iterates over own and inherited source properties.
+       *
+       * @method extend
+       * @public
+       * @param  {Object}    object  The destination object.
+       * @params {...Object} sources The source objects.
+       * @return {Object}            Returns object.
+       */
+      extend : function() {
+        return _.extend.apply(this, arguments);
+      },
+
       /**
        * Deep search inside an object
        *
@@ -268,6 +1101,23 @@ const util = function() {
        *                               default value specified. or undefined.
        */
       get : _objectGet,
+
+      /**
+       * Creates an array of the own enumerable property names of object.
+       *
+       * @method keys
+       * @public
+       * @param  {Object} obj The object to query.
+       * @return {Array}      Returns the array of property names.
+       */
+      keys : function(obj) {
+        if (this.isObject(obj)) {
+          return Object.keys(obj);
+        } else {
+          _log('util : object : keys : Value passed is not an object');
+          return null;
+        }
+      },
 
       /**
        * Deep value set in an object
@@ -316,31 +1166,133 @@ const util = function() {
       sanity : _checkSanity,
 
       /**
+       * Creates an object with the same keys as object and values generated by running each own
+       * enumerable string keyed property of object thru iteratee. The iteratee is invoked with
+       * three arguments: (value, key, object).
+       *
+       * @method  mapValues
+       * @public
+       * @param  {Object}   object      The object to iterate over.
+       * @param  {Function} [iteratee]  The function invoked per iteration.
+       * @return {Object}               Returns the new mapped object.
+       */
+      mapValues : function() {
+        return _.mapValues.apply(this, arguments);
+      },
+
+      /**
+       * check mapValues documentation
+       *
+       * @method  mapObject
+       * @public
+       */
+      mapObject : function() {
+        this.mapValues.apply(this, arguments);
+      },
+
+      /**
+       * This method is recursively merges own and inherited enumerable
+       * string keyed properties of source objects into the destination object.
+       * Source properties that resolve to undefined are skipped if a destination
+       * value exists. Array and plain object properties are merged recursively.
+       * Other objects and value types are overridden by assignment. Source objects
+       * are applied from left to right. Subsequent sources overwrite property assignments
+       * of previous sources.
+       *
+       * @method merge
+       * @public
+       * @param  {Object}    object     The destination object.
+       * @params {...Object} [sources]  The source objects.
+       * @return {Object}               Returns object.
+       */
+      merge : function() {
+        return _.merge.apply(this, arguments);
+      },
+
+      /**
        * Overwrites obj1's values with obj2's and adds obj2's if non existent in obj1
        *
-       * @method  merge
+       * TODO: IK : Test performance between lodash merge and yours.
+       *
+       * @method  mergeOld
        * @public
        * @param {Object}  obj1   Object to be overwritten
        * @param {Object}  obj2   Object to overwritten obj1
        * @return {Object}        A new object based on obj1 and obj2
        */
-      merge : function(obj1, obj2) {
+      mergeOld : function(obj1, obj2) {
         const obj3 = {};
-        let   attrname;
+        let attrname;
 
         if (!_isEmpty(obj1)) {
           for (attrname in obj1) {
-            obj3[attrname] = obj1[attrname];
+            _objectSet(obj3, attrname,  _objectGet(obj1, attrname));
           }
         }
 
         if (!_isEmpty(obj2)) {
           for (attrname in obj2) {
-            obj3[attrname] = obj2[attrname];
+            _objectSet(obj3, attrname,  _objectGet(obj2, attrname));
           }
         }
 
         return obj3;
+      },
+
+      /**
+       * Checks 2 objects if they are equals
+       *
+       * @method areEquals
+       * @public
+       * @param  {Object} obj1  Object 1
+       * @param  {Object} obj2  Object 2
+       * @return {Boolean}      True if they are equals, false otherwise
+       */
+      areEquals : function(obj1, obj2) {
+        if (obj1 && obj2 &&
+            typeof obj1 === 'object' &&
+            typeof obj2 === 'object') {
+
+          if (Object.keys(obj1).length === Object.keys(obj2).length) {
+            return Object.keys(obj1).every((key) => {
+              return this.areEquals(obj1[key], obj2[key]);
+            });
+          } else {
+            return false;
+          }
+        } else {
+          return (obj1 === obj2);
+        }
+      },
+
+      /**
+       * Renames a key in an object
+       *
+       * @method renameKey
+       * @public
+       * @param  {Object} obj     Object which we want to rename the key
+       * @param  {String} oldName The key we want to rename
+       * @param  {String} newName The new name we want to give to the key
+       */
+      renameKey : function(obj, oldName, newName) {
+        if (obj && typeof obj === 'object') {
+          Object.defineProperty(obj, newName,
+                  Object.getOwnPropertyDescriptor(obj, oldName));
+          delete obj[oldName];
+        }
+      },
+
+      /**
+       * Checks if value is the language type of Object.
+       * (e.g. arrays, functions, objects, regexes, new Number(0), and new String(''))
+       *
+       * @method  isObject
+       * @public
+       * @param {*}        value  The value to check.
+       * @return {Boolean}        Returns true if value is an object, else false.
+       */
+      isObject : function() {
+        return _.isObject.apply(this, arguments);
       }
     },
 
@@ -350,6 +1302,18 @@ const util = function() {
      * @class util.random
      */
     random : {
+
+      /**
+       * Generates a unique ID. If prefix is given, the ID is appended to it.
+       *
+       * @method uniqueId
+       * @public
+       * @param  {String} [prefix]  The value to prefix the ID with.
+       * @return {String}           Returns the unique ID.
+       */
+      uniqueId : function() {
+        return _.uniqueId.apply(this, arguments);
+      },
 
       /**
        * Generates a random number
@@ -386,6 +1350,6 @@ const util = function() {
       }
     }
   };
-};
+});
 
 export default util;

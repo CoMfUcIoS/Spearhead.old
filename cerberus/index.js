@@ -1,7 +1,6 @@
 import http       from 'http';
 import httpProxy  from 'http-proxy';
 import os         from 'os';
-import _          from 'lodash';
 import alias      from './avahiAlias.js';
 import chimera    from '../chimera/index.js';
 
@@ -30,6 +29,6 @@ util.log('Cerberus is listening on port 80');
 server.listen(80);
 
 // Then publish all subdomains from vhost
-_.forOwn(vhosts, function(value, vhost) {
+util.object.forOwn(vhosts, function(value, vhost) {
   alias.publish(`${vhost}.${rootDomain}`);
 });
