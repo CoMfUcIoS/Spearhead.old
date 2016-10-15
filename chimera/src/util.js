@@ -995,6 +995,20 @@ const util = (function() {
     object : {
 
       /**
+       * This method is like _.find except that it returns the key of the first element predicate
+       * returns truthy for instead of the element itself.
+       *
+       * @method findKey
+       * @public
+       * @param {Object}    object     The object to inspect.
+       * @param {Function}  predicate  The function invoked per iteration.
+       * @return {*}                   Returns the key of the matched element, else undefined.
+       */
+      findKey : function() {
+        return _.findKey.apply(this, arguments);
+      },
+
+      /**
        * Iterates over own enumerable string keyed properties of an object and invokes iteratee for each property.
        * The iteratee is invoked with three arguments: (value, key, object).
        * Iteratee functions may exit iteration early by explicitly returning false.

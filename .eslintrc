@@ -14,7 +14,7 @@
   "plugins": [
     "react"
   ],
-  "globals": {
+  "globals": [
     "afterEach",
     "beforeEach",
     "describe",
@@ -24,7 +24,7 @@
     "jest",
     "xdescribe",
     "xit"
-  },
+  ],
   "parser": "babel-eslint",
   "parserOptions": {
     "ecmaFeatures": {
