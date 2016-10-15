@@ -31,6 +31,10 @@ const requires = [
       }
     });
 
+let client = {
+  uuid : 'cerberus'
+};
+
 server.listen(port);
 util.log(`Cerberus is listening on port ${port}`);
 
@@ -51,8 +55,23 @@ wsClient.connect({ origin : 'cerberus', events : (connection) => {
     util.log('Cerberus ws echo-protocol Connection Closed');
   });
   connection.on('message', function(message) {
-    if (message.type === 'utf8') {
-      util.log(`Received: '${message.utf8Data }'`);
+    message = JSON.parse(message.utf8Data);
+    if (util.toType(message) !== 'object') {
+      util.log('What i got smth without a type? Huh ?');
+    } else {
+      switch (message.type) {
+        case 'uuid' : {
+          client.id = message.uuid;
+          connection.send(JSON.stringify({ type : 'message', message : 'thanks' }));
+          break;
+        }
+      }
     }
   });
+
+  setTimeout(function() {
+    console.log('send mesage');
+    connection.send(JSON.stringify({ to : 'medusa', message : { message : 'Hello Bitch !', type : 'uuid' } }));
+  }, 5000);
+
 } });

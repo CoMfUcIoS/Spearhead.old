@@ -6,8 +6,9 @@
  * @returns {Object} Module component
  */
 
-import _  from 'lodash';
-import os from 'os';
+import _    from 'lodash';
+import os   from 'os';
+import uuid from 'uuid';
 
 
 const util = (function() {
@@ -271,6 +272,17 @@ const util = (function() {
       _config = requires['config'];
       _util = this;
       /*eslint-enable dot-notation*/
+    },
+
+    /**
+     * Returns a unique user identifier
+     *
+     * @method uuid
+     * @public
+     * @return {String} The uuid
+     */
+    uuid : function() {
+      return uuid.v4();
     },
 
     isEmpty : _isEmpty,

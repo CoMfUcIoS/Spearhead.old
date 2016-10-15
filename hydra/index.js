@@ -26,14 +26,13 @@
       }),
       CLIENTS = {};
 
-
   httpServer.listen(port, function() {
     util.log(`Hydra server is listening on port ${port}`);
   });
 
 
   function originIsAllowed(origin) {
-    const allowedOrigins = Object.keys(config.get(ports));
+    const allowedOrigins = Object.keys(config.get('ports'));
     // accept our apps.
     let allowed = (allowedOrigins.indexOf(origin) > -1) && (!CLIENTS[origin]);
 
@@ -44,26 +43,74 @@
     return allowed;
   }
 
+  function _itsOurOwnApp(app) {
+    const allowedOrigins = Object.keys(config.get('ports')),
+        ownApp = (allowedOrigins.indexOf(app) > -1);
+    return ownApp;
+  }
+
 
   wsServer.on('request', function(request) {
-    const origin = request.origin;
+    const origin = request.origin,
+        ownApp = _itsOurOwnApp(origin),
+        uuid = util.uuid();
 
     if (!originIsAllowed(origin)) {
       // Make sure we only accept requests from an allowed origin
       request.reject();
-      util.log((new Date()) + ' Connection from origin ' + origin + ' rejected.');
+      util.log(' Connection from origin ' + origin + ' rejected.');
       return;
     }
 
     let connection = request.accept('echo-protocol', origin);
-    util.log(`Connection from ${origin} accepted.`);
+    util.log(`Connection from ${origin} accepted. Client Id ${uuid}`);
 
-    if ()
+    if (ownApp) {
+      CLIENTS[origin] = connection;
+    } else {
+      if (util.toType(CLIENTS[origin]) !== 'object') {
+        CLIENTS[origin] = {};
+      }
+      CLIENTS[origin][uuid] = connection;
+    }
 
-    CLIENTS[origin] = connection;
+    connection.on('message', function(message) {
+      message = JSON.parse(message.utf8Data);
+      if (util.object.get(message, 'to')) {
+        let connectionTo;
+        if (message.to !== 'all') {
+          if (_itsOurOwnApp(message.to)) {
+            connectionTo = util.object.get(CLIENTS, message.to);
+          } else {
+            connectionTo = util.object.get(CLIENTS[origin], message.to);
+          }
+
+          if (connectionTo) {
+            connectionTo.send(JSON.stringify(message.message));
+          }
+        } else {
+          console.log('To ALl ... but who ? ownApps or not ?');
+        }
+      } else if (util.toType(message) !== 'object') {
+        util.log('What i got smth without a type? Huh ?');
+      } else {
+        switch (message.type) {
+          case 'message' : {
+            util.log(`Got a mesage from ${origin} - ${uuid}, message : ${message.message}`);
+            break;
+          }
+        }
+      }
+    });
+
+    connection.send(JSON.stringify({ type : 'uuid', uuid }));
 
     connection.on('close', function(reasonCode, description) {
-      delete CLIENTS[origin];
-      util.log(`Peer ${connection.remoteAddress} disconnected.`);
+      if (!ownApp) {
+        delete CLIENTS[origin][uuid];
+      } else {
+        delete CLIENTS[origin];
+      }
+      util.log(`Peer ${connection.remoteAddress} with uuid : ${uuid} disconnected.`);
     });
   });

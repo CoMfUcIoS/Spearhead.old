@@ -9,7 +9,9 @@ const requires = [
     { util, config, wsClient }  = chimera.initialize(requires),
     port = config.get('ports.medusa'),
     app = express();
-
+let client = {
+  uuid : 'medusa'
+};
 app.get('/', function(req, res) {
   res.sendFile('index.html', { root : __dirname });
 });
@@ -27,8 +29,19 @@ wsClient.connect({ origin : 'medusa', events : (connection) => {
     util.log('Medusa ws echo-protocol Connection Closed');
   });
   connection.on('message', function(message) {
-    if (message.type === 'utf8') {
-      util.log(`Received: '${message.utf8Data }'`);
+
+    console.log(message);
+    message = JSON.parse(message.utf8Data);
+    if (util.toType(message) !== 'object') {
+      util.log('What i got smth without a type? Huh ?');
+    } else {
+      switch (message.type) {
+        case 'uuid' : {
+          client.id = message.uuid;
+          connection.send(JSON.stringify({ type : 'message', message : 'thanks' }));
+          break;
+        }
+      }
     }
   });
 } });

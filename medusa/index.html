@@ -1,5 +1,5 @@
 <script>
-  var exampleSocket = new WebSocket('ws://ws.optimus.local:4730/', 'echo-protocol');
+  var exampleSocket = new WebSocket('ws://localhost:4730/', 'echo-protocol');
 
   exampleSocket.onmessage =  function(message) {
     console.log(message);
