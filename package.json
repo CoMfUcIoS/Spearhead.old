@@ -34,6 +34,7 @@
   "devDependencies": {
     "nodemon": "^1.10.2",
     "eslint": "^3.8.0",
+    "babel-eslint": "^7.0.0",
     "babel-istanbul": "^0.8.0",
     "eslint-plugin-react": "^6.4.1",
     "yuidocjs": "^0.10.2"

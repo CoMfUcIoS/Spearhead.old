@@ -12,7 +12,8 @@ import { client as Client } from 'websocket';
 const wsClient = function() {
 
   let _util,
-      _config;
+      _config,
+      _client;
 
   /*!
    * Retrieves uri for hydras connection. If a vhost is defined
@@ -25,7 +26,36 @@ const wsClient = function() {
   function _getHydraUri() {
     const port = _config.get('ports.hydra'),
         vhost = _util.object.findKey(_config.get('vhosts'), (vPort) => vPort === port);
-    return vhost || `ws://localhost:${port}/`;
+    return (_util.toType(vhost) !== 'undefined') ? `ws://${vhost}.${_util.hostname().toLowerCase()}.local:${port}` : `ws://localhost:${port}/`;
+  }
+
+  /*!
+   * Connects to the ws server
+   *
+   * @method _connectToServer
+   * @private
+   * @param  {[type]} options.uri    [description]
+   * @param  {[type]} options.events [description]
+   * @return {[type]}                [description]
+   */
+  function _connectToServer({ uri, events, origin }) {
+    uri = uri || _getHydraUri();
+    _client = new Client();
+
+    _util.log(`connecting to ${uri}`);
+
+    _client.on('connectFailed', function(error) {
+      _util.log(`Connect Error: ${error.toString()} retring to connect again in 5 secs`);
+      setTimeout(() => {
+        _connectToServer({ uri, events, origin });
+      }, 5000);
+    });
+
+    _client.on('connect', function(connection) {
+      events(connection);
+    });
+
+    _client.connect(uri, 'echo-protocol', origin);
   }
 
   /**
@@ -55,7 +85,7 @@ const wsClient = function() {
     _init_ : function(requires) {
       /*eslint-disable dot-notation*/
       _util   = requires['util'];
-      _config   = requires['config'];
+      _config = requires['config'];
       /*eslint-enable dot-notation*/
     },
 
@@ -67,13 +97,10 @@ const wsClient = function() {
      * @param  {String} uri Uri of the ws server
      * @return {Object}     Returns the client connection
      */
-    connect : function(uri) {
-      uri = uri || _getHydraUri();
-      const client = new Client();
+    connect : function({ uri, events, origin }) {
+      _client = _connectToServer({ uri, events, origin });
 
-      client.connect(uri, 'echo-protocol');
-
-      return client;
+      return _client;
     }
   };
 };
