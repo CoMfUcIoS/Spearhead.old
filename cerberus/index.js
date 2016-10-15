@@ -70,7 +70,7 @@ wsClient.connect({ origin : 'cerberus', events : (connection) => {
   });
 
   setTimeout(function() {
-    console.log('send mesage');
+    util.log('Send a test mesage to medusa');
     connection.send(JSON.stringify({ to : 'medusa', message : { message : 'Hello Bitch !', type : 'uuid' } }));
   }, 5000);
 

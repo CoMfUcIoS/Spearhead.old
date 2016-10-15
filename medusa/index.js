@@ -30,7 +30,7 @@ wsClient.connect({ origin : 'medusa', events : (connection) => {
   });
   connection.on('message', function(message) {
 
-    console.log(message);
+    util.log(message);
     message = JSON.parse(message.utf8Data);
     if (util.toType(message) !== 'object') {
       util.log('What i got smth without a type? Huh ?');

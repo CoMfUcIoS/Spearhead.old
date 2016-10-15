@@ -13,7 +13,7 @@ const framework = (function() {
   let _modules   = {},
       _neededMods;
 
-  /*!``
+  /*!
    * Fetches all the files in specified folder.
    *
    * @method _fetchFiles

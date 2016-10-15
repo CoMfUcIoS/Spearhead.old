@@ -32,9 +32,8 @@
 
 
   function originIsAllowed(origin) {
-    const allowedOrigins = Object.keys(config.get('ports'));
     // accept our apps.
-    let allowed = (allowedOrigins.indexOf(origin) > -1) && (!CLIENTS[origin]);
+    let allowed = _itsOurOwnApp(origin) && (!CLIENTS[origin]);
 
     if (!allowed && util.toType(origin) === 'string') {
       allowed = (origin.indexOf(`${util.hostname().toLowerCase()}.local`) > -1);
@@ -89,7 +88,7 @@
             connectionTo.send(JSON.stringify(message.message));
           }
         } else {
-          console.log('To ALl ... but who ? ownApps or not ?');
+          util.log('To ALl ... but who ? ownApps or not ?');
         }
       } else if (util.toType(message) !== 'object') {
         util.log('What i got smth without a type? Huh ?');
