@@ -18,3 +18,15 @@ Now you can start applications with PM2 that can bind to port 80 without being r
 It’s recommended to put an alias in your .bashrc file:
 
 alias pm2='authbind --deep pm2'
+
+
+
+Then you need to start spearhead apps
+npm run start
+
+Then use the following to save pm2 config
+pm2 save
+
+Then you need to add pm2 on startup
+pm2 startup
+(Follow the instruction given :) )
