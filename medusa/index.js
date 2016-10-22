@@ -16,6 +16,10 @@ app.get('/', function(req, res) {
   res.sendFile('index.html', { root : __dirname });
 });
 
+app.get('/overview', function(req, res) {
+  res.sendFile('overview.html', { root : __dirname });
+});
+
 app.listen(port, function() {
   util.log(`Medusa app listening on port ${port}!`);
 });
