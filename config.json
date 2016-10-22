@@ -10,5 +10,6 @@
     "medusa" : 1233,
     "ws": 4730
   },
-  "debug" : true
+  "debug" : true,
+  "avahiPath" : "/usr/sbin/avahi-daemon"
 }

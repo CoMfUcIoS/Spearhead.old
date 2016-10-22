@@ -1,6 +1,7 @@
 import http       from 'http';
 import httpProxy  from 'http-proxy';
 import chimera    from '../chimera/index.js';
+import fs         from 'fs';
 
 const requires = [
       'util',
@@ -40,9 +41,13 @@ util.log(`Cerberus is listening on port ${port}`);
 
 // check debug to see if we are live or not to publish to avahi some aliases.
 if (config.get('debug')) {
-  // Then publish all subdomains from vhost
-  util.object.forOwn(vhosts, function(value, vhost) {
-    avahiAlias.publish(vhost);
+  fs.access(config.get('avahiPath'), fs.F_OK, function(err) {
+    if (!err) {
+      // Then publish all subdomains from vhost
+      util.object.forOwn(vhosts, function(value, vhost) {
+        avahiAlias.publish(vhost);
+      });
+    }
   });
 }
 
