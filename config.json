@@ -13,6 +13,7 @@
   "debug" : true,
   "avahiPath" : "/usr/sbin/avahi-daemon",
   "allowedSSLDomains" : [
-    "rpi.studio110.eu"
+    "rpi.studio110.eu",
+    "john.gotdns.ch"
   ]
 }
