@@ -20,15 +20,15 @@ const requires = [
     port = config.get('ports.cerberus'),
     lex = le.create({
       // set to https://acme-v01.api.letsencrypt.org/directory in production
-      server     : 'staging',
-    // If you wish to replace the default plugins, you may do so here
-    //
+      server     : config.get('debug') ? 'staging' : 'https://acme-v01.api.letsencrypt.org/directory',
+      // If you wish to replace the default plugins, you may do so here
+      //
       challenges : { 'http-01' : Challenge.create({ webrootPath : '/tmp/acme-challenges' }) },
       store      : store.create({ webrootPath : '/tmp/acme-challenges' }),
 
-    // You probably wouldn't need to replace the default sni handler
-    // See https://github.com/Daplie/le-sni-auto if you think you do
-    //, sni: require('le-sni-auto').create({})
+      // You probably wouldn't need to replace the default sni handler
+      // See https://github.com/Daplie/le-sni-auto if you think you do
+      //, sni: require('le-sni-auto').create({})
 
       approveDomains : approveDomains
     }),
