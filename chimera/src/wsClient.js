@@ -7,6 +7,8 @@
  */
 
 import { client as Client } from 'websocket';
+import $ from 'jquery-deferred';
+import request from 'request';
 
 
 const wsClient = function() {
@@ -24,9 +26,25 @@ const wsClient = function() {
    * @return {String} Uri
    */
   function _getHydraUri() {
-    const port = _config.get('ports.hydra'),
+    const $defer = $.Deferred(),
+        port = _config.get('ports.hydra'),
         vhost = _util.object.findKey(_config.get('vhosts'), (vPort) => vPort === port);
-    return (_util.toType(vhost) !== 'undefined') ? `ws://${vhost}.${_util.hostname().toLowerCase()}.local:${port}` : `ws://localhost:${port}/`;
+    let uri;
+
+    if (_util.toType(vhost) !== 'undefined') {
+      uri = `ws://${vhost}.${_util.hostname().toLowerCase()}.local:${port}`;
+      request(uri, (error, response, body) => { //eslint-disable-line
+        if (!error && response.statusCode === 200) {
+          $defer.resolve(uri);
+        } else {
+          $defer.resolve(`ws://localhost:${port}/`);
+        }
+      });
+    } else {
+      $defer.resolve(`ws://localhost:${port}/`);
+    }
+
+    return $defer.promise();
   }
 
   /*!
@@ -39,23 +57,33 @@ const wsClient = function() {
    * @return {[type]}                [description]
    */
   function _connectToServer({ uri, events, origin }) {
-    uri = uri || _getHydraUri();
-    _client = new Client();
+    function _makeConnection() {
+      _client = new Client();
 
-    _util.log(`connecting to ${uri}`);
+      _util.log(`connecting to ${uri}`);
 
-    _client.on('connectFailed', function(error) {
-      _util.log(`Connect Error: ${error.toString()} retring to connect again in 5 secs`);
-      setTimeout(() => {
-        _connectToServer({ uri, events, origin });
-      }, 5000);
-    });
+      _client.on('connectFailed', function(error) {
+        _util.log(`Connect Error: ${error.toString()} retring to connect again in 5 secs`);
+        setTimeout(() => {
+          _connectToServer({ uri, events, origin });
+        }, 5000);
+      });
 
-    _client.on('connect', function(connection) {
-      events(connection);
-    });
+      _client.on('connect', function(connection) {
+        events(connection);
+      });
 
-    _client.connect(uri, 'echo-protocol', origin);
+      _client.connect(uri, 'echo-protocol', origin);
+    }
+
+    if (uri) {
+      _makeConnection();
+    } else {
+      _getHydraUri().done((data) => {
+        uri = data;
+        _makeConnection();
+      });
+    }
   }
 
   /**
