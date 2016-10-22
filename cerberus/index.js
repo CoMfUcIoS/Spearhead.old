@@ -61,15 +61,20 @@ const requires = [
         return null;
       }
     },
-    server = http.createServer(proxyFun);
+    server = http.createServer(proxyFun),
+    allowedSSLDomains = config.get('allowedSSLDomains');
 
 let client = {
   uuid : 'cerberus'
 };
 
 function approveDomains(opts, certs, cb) {
-  // TODO: This is where you check your database and associated
+  // This is where you check your database and associated
   // email addresses with domains and agreements and such
+
+  if (allowedSSLDomains.indexOf(opts.domain) < 0) {
+    return;
+  }
 
   // The domains being approved for the first time are listed in opts.domains
   // Certs being renewed are listed in certs.altnames

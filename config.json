@@ -11,5 +11,8 @@
     "ws": 4730
   },
   "debug" : true,
-  "avahiPath" : "/usr/sbin/avahi-daemon"
+  "avahiPath" : "/usr/sbin/avahi-daemon",
+  "allowedSSLDomains" : [
+    "rpi.studio110.eu"
+  ]
 }
