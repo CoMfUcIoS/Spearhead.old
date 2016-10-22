@@ -18,9 +18,10 @@ const requires = [
     vhosts = config.get('vhosts'),
     proxy = httpProxy.createProxyServer({}),
     port = config.get('ports.cerberus'),
+    debug = config.get('debug'),
     lex = le.create({
       // set to https://acme-v01.api.letsencrypt.org/directory in production
-      server     : config.get('debug') ? 'staging' : 'https://acme-v01.api.letsencrypt.org/directory',
+      server     : debug ? 'staging' : 'https://acme-v01.api.letsencrypt.org/directory',
       // If you wish to replace the default plugins, you may do so here
       //
       challenges : { 'http-01' : Challenge.create({ webrootPath : '/tmp/acme-challenges' }) },
@@ -63,6 +64,7 @@ function approveDomains(opts, certs, cb) {
   if (certs) {
     opts.domains = certs.altnames;
   } else {
+    opts.server = 'https://acme-v01.api.letsencrypt.org/directory';
     opts.email = 'john@studio110.eu';
     opts.agreeTos = true;
   }
@@ -76,7 +78,7 @@ function approveDomains(opts, certs, cb) {
 
 
 // check debug to see if we are live or not to publish to avahi some aliases plus to force ssl.
-if (config.get('debug')) {
+if (debug) {
   server.listen(port);
 
   fs.access(config.get('avahiPath'), fs.F_OK, (err) => {
