@@ -54,7 +54,7 @@ const avahiAlias = function() {
     throw new Error(`${message} : ${error}`);
   }
 
-  function _publish(cname) {
+  function _publish(cname, whole) {
     if (!_bus) {
       _self.init();
     }
@@ -69,7 +69,7 @@ const avahiAlias = function() {
       return;
     }
 
-    cname = `${cname}.${rootDomain}`;
+    cname = (!whole) ? `${cname}.${rootDomain}` : cname;
 
     service.getInterface(Avahi.DBUS_PATH_SERVER, Avahi.DBUS_INTERFACE_SERVER, function(error, server) {
       if (error) {

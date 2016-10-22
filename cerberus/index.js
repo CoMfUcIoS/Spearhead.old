@@ -1,7 +1,12 @@
 import http       from 'http';
+import https      from 'https';
 import httpProxy  from 'http-proxy';
 import chimera    from '../chimera/index.js';
 import fs         from 'fs';
+import le         from 'letsencrypt-express';
+import Challenge  from 'le-challenge-fs';
+import store      from 'le-store-certbot';
+import redirecthttps from 'redirect-https';
 
 const requires = [
       'util',
@@ -13,30 +18,86 @@ const requires = [
     vhosts = config.get('vhosts'),
     proxy = httpProxy.createProxyServer({}),
     port = config.get('ports.cerberus'),
-    server = http.createServer((req, res) => {
-      const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
-          appPort = util.object.get(vhosts, host, vhosts['default']);
+    lex = le.create({
+      // set to https://acme-v01.api.letsencrypt.org/directory in production
+      server     : 'staging',
+    // If you wish to replace the default plugins, you may do so here
+    //
+      challenges : { 'http-01' : Challenge.create({ webrootPath : '/tmp/acme-challenges' }) },
+      store      : store.create({ webrootPath : '/tmp/acme-challenges' }),
 
-      proxy.on('error', function(e) {
-        util.log(e);
-      });
+    // You probably wouldn't need to replace the default sni handler
+    // See https://github.com/Daplie/le-sni-auto if you think you do
+    //, sni: require('le-sni-auto').create({})
 
-      if (typeof appPort !== 'undefined') {
-        proxy.web(req, res, {
-          target : `${(host === 'ws') ? 'ws' : 'http'}://127.0.0.1:${appPort}`,
-          ws     : (host === 'ws')
-        });
-        return true;
-      } else {
-        return null;
-      }
+      approveDomains : approveDomains
+    }),
+    // server = http.createServer((req, res) => {
+    //   const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
+    //       appPort = util.object.get(vhosts, host, vhosts['default']);
+
+    //   proxy.on('error', function(e) {
+    //     util.log(e);
+    //   });
+    //   if (typeof appPort !== 'undefined') {
+    //     proxy.web(req, res, {
+    //       target : `${(host === 'ws') ? 'ws' : 'http'}://127.0.0.1:${appPort}`,
+    //       ws     : (host === 'ws')
+    //     });
+    //     return true;
+    //   } else {
+    //     return null;
+    //   }
+    // });
+    server = http.createServer(lex.middleware(redirecthttps())).listen(80, function() {
+      console.log('Listening for ACME http-01 challenges on', this.address());
     });
 
 let client = {
   uuid : 'cerberus'
 };
 
-server.listen(port);
+https.createServer(lex.httpsOptions, lex.middleware((req, res) => {
+  const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
+      appPort = util.object.get(vhosts, host, vhosts['default']);
+
+  proxy.on('error', function(e) {
+    util.log(e);
+  });
+  if (typeof appPort !== 'undefined') {
+    proxy.web(req, res, {
+      target : `${(host === 'ws') ? 'wss' : 'https'}://127.0.0.1:${appPort}`,
+      ws     : (host === 'ws')
+    });
+    return true;
+  } else {
+    return null;
+  }
+})).listen(443);
+
+
+function approveDomains(opts, certs, cb) {
+  // This is where you check your database and associated
+  // email addresses with domains and agreements and such
+  console.log(opts, certs, cb);
+
+  // The domains being approved for the first time are listed in opts.domains
+  // Certs being renewed are listed in certs.altnames
+  if (certs) {
+    opts.domains = certs.altnames;
+  } else {
+    opts.email = 'john@studio110.eu';
+    opts.agreeTos = true;
+  }
+
+  // NOTE: you can also change other options such as `challengeType` and `challenge`
+  // opts.challengeType = 'http-01';
+  // opts.challenge = require('le-challenge-fs').create({});
+
+  cb(null, { options : opts, certs : certs });
+}
+
+// server.listen(port);
 util.log(`Cerberus is listening on port ${port}`);
 
 // check debug to see if we are live or not to publish to avahi some aliases.
@@ -47,6 +108,7 @@ if (config.get('debug')) {
       util.object.forOwn(vhosts, function(value, vhost) {
         avahiAlias.publish(vhost);
       });
+      avahiAlias.publish('rpi.studio110.eu', true);
     }
   });
 }
