@@ -31,56 +31,32 @@ const requires = [
     //, sni: require('le-sni-auto').create({})
 
       approveDomains : approveDomains
-    });
-    // server = http.createServer((req, res) => {
-    //   const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
-    //       appPort = util.object.get(vhosts, host, vhosts['default']);
+    }),
+    server = http.createServer((req, res) => {
+      const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
+          appPort = util.object.get(vhosts, host, vhosts['default']);
 
-    //   proxy.on('error', function(e) {
-    //     util.log(e);
-    //   });
-    //   if (typeof appPort !== 'undefined') {
-    //     proxy.web(req, res, {
-    //       target : `${(host === 'ws') ? 'ws' : 'http'}://127.0.0.1:${appPort}`,
-    //       ws     : (host === 'ws')
-    //     });
-    //     return true;
-    //   } else {
-    //     return null;
-    //   }
-    // });
+      proxy.on('error', function(e) {
+        util.log(e);
+      });
+      if (typeof appPort !== 'undefined') {
+        proxy.web(req, res, {
+          target : `${(host === 'ws') ? 'ws' : 'http'}://127.0.0.1:${appPort}`,
+          ws     : (host === 'ws')
+        });
+        return true;
+      } else {
+        return null;
+      }
+    });
 
 let client = {
   uuid : 'cerberus'
 };
 
-http.createServer(lex.middleware(redirecthttps())).listen(80, function() {
-  console.log('Listening for ACME http-01 challenges on', this.address());
-});
-
-https.createServer(lex.httpsOptions, lex.middleware((req, res) => {
-  const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
-      appPort = util.object.get(vhosts, host, vhosts['default']);
-  console.log(host);
-  proxy.on('error', (e) => {
-    util.log(e);
-  });
-  if (typeof appPort !== 'undefined') {
-    proxy.web(req, res, {
-      target : `${(host === 'ws') ? 'wss' : 'https'}://127.0.0.1:${appPort}`,
-      ws     : (host === 'ws')
-    });
-    return true;
-  } else {
-    return null;
-  }
-})).listen(443);
-
-
 function approveDomains(opts, certs, cb) {
-  // This is where you check your database and associated
+  // TODO: This is where you check your database and associated
   // email addresses with domains and agreements and such
-  console.log(opts, certs, cb);
 
   // The domains being approved for the first time are listed in opts.domains
   // Certs being renewed are listed in certs.altnames
@@ -98,21 +74,45 @@ function approveDomains(opts, certs, cb) {
   cb(null, { options : opts, certs : certs });
 }
 
-// server.listen(port);
-util.log(`Cerberus is listening on port ${port}`);
 
-// check debug to see if we are live or not to publish to avahi some aliases.
+// check debug to see if we are live or not to publish to avahi some aliases plus to force ssl.
 if (config.get('debug')) {
+  server.listen(port);
+
   fs.access(config.get('avahiPath'), fs.F_OK, (err) => {
     if (!err) {
       // Then publish all subdomains from vhost
       util.object.forOwn(vhosts, (value, vhost) => {
         avahiAlias.publish(vhost);
       });
-      avahiAlias.publish('rpi.studio110.eu', true);
     }
   });
+
+} else {
+
+  // redirect traffic to https port
+  http.createServer(lex.middleware(redirecthttps())).listen(80);
+
+  https.createServer(lex.httpsOptions, lex.middleware((req, res) => {
+    const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
+        appPort = util.object.get(vhosts, host, vhosts['default']);
+
+    proxy.on('error', (e) => {
+      util.log(e);
+    });
+    if (typeof appPort !== 'undefined') {
+      proxy.web(req, res, {
+        target : `${(host === 'ws') ? 'ws' : 'http'}://127.0.0.1:${appPort}`,
+        ws     : (host === 'ws')
+      });
+      return true;
+    } else {
+      return null;
+    }
+  })).listen(443);
 }
+
+util.log(`Cerberus is listening on port ${port}`);
 
 wsClient.connect({ origin : 'cerberus', events : (connection) => {
   util.log('Cerberus Connected to Websocket!');
