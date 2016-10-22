@@ -27,7 +27,8 @@ const avahiAlias = function() {
       };
 
   let _util,
-      _bus;
+      _bus,
+      _self;
 
   function _encode(name) {
     return _util.map(name.split('.'), function(p) {
@@ -54,6 +55,9 @@ const avahiAlias = function() {
   }
 
   function _publish(cname) {
+    if (!_bus) {
+      _self.init();
+    }
     if (cname === 'default') {
       return;
     }
@@ -139,7 +143,10 @@ const avahiAlias = function() {
       /*eslint-disable dot-notation*/
       _util   = requires['util'];
       /*eslint-enable dot-notation*/
+      _self = this;
+    },
 
+    init : function() {
       _bus     = dbus.systemBus();
     },
 
