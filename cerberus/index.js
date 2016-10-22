@@ -19,7 +19,7 @@ const requires = [
     proxy = httpProxy.createProxyServer({}),
     port = config.get('ports.cerberus'),
     debug = config.get('debug'),
-    leStore = store.create({
+    leStore = require('le-store-certbot').create({
       configDir     : '~/letsencrypt/etc',          // or /etc/letsencrypt or wherever
       privkeyPath   : ':configDir/live/:hostname/privkey.pem',          //
       fullchainPath : ':configDir/live/:hostname/fullchain.pem',      // Note: both that :configDir and :hostname
@@ -30,12 +30,12 @@ const requires = [
       webrootPath   : '~/letsencrypt/srv/www/:hostname/.well-known/acme-challenge',
       debug         : debug
     }),
-    lex = le.create({
+    lex = require('letsencrypt-express').create({
       // set to https://acme-v01.api.letsencrypt.org/directory in production
       server     : debug ? 'staging' : 'https://acme-v01.api.letsencrypt.org/directory',
       // If you wish to replace the default plugins, you may do so here
       //
-      challenges : { 'http-01' : Challenge.create({ webrootPath : '~/letsencrypt/var/acme-challenges' }) },
+      challenges : { 'http-01' : require('le-challenge-fs').create({ webrootPath : '~/letsencrypt/var/acme-challenges' }) },
       store      : leStore,
 
       // You probably wouldn't need to replace the default sni handler
@@ -44,7 +44,7 @@ const requires = [
 
       approveDomains : approveDomains
     }),
-    server = http.createServer((req, res) => {
+    proxyFun = (req, res) => {
       const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
           appPort = util.object.get(vhosts, host, vhosts['default']);
 
@@ -60,7 +60,8 @@ const requires = [
       } else {
         return null;
       }
-    });
+    },
+    server = http.createServer(proxyFun);
 
 let client = {
   uuid : 'cerberus'
@@ -101,27 +102,10 @@ if (debug) {
   });
 
 } else {
-
   // redirect traffic to https port
   http.createServer(lex.middleware(redirecthttps())).listen(80);
 
-  https.createServer(lex.httpsOptions, lex.middleware((req, res) => {
-    const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
-        appPort = util.object.get(vhosts, host, vhosts['default']);
-
-    proxy.on('error', (e) => {
-      util.log(e);
-    });
-    if (typeof appPort !== 'undefined') {
-      proxy.web(req, res, {
-        target : `${(host === 'ws') ? 'ws' : 'http'}://127.0.0.1:${appPort}`,
-        ws     : (host === 'ws')
-      });
-      return true;
-    } else {
-      return null;
-    }
-  })).listen(443);
+  https.createServer(lex.httpsOptions, lex.middleware(proxyFun)).listen(443);
 }
 
 util.log(`Cerberus is listening on port ${port}`);
