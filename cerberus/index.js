@@ -19,13 +19,24 @@ const requires = [
     proxy = httpProxy.createProxyServer({}),
     port = config.get('ports.cerberus'),
     debug = config.get('debug'),
+    leStore = store.create({
+      configDir     : '~/letsencrypt/etc',          // or /etc/letsencrypt or wherever
+      privkeyPath   : ':configDir/live/:hostname/privkey.pem',          //
+      fullchainPath : ':configDir/live/:hostname/fullchain.pem',      // Note: both that :configDir and :hostname
+      certPath      : ':configDir/live/:hostname/cert.pem',                //       will be templated as expected by
+      chainPath     : ':configDir/live/:hostname/chain.pem',              //       node-letsencrypt
+      workDir       : '~/letsencrypt/var/lib',
+      logsDir       : '~/letsencrypt/var/log',
+      webrootPath   : '~/letsencrypt/srv/www/:hostname/.well-known/acme-challenge',
+      debug         : debug
+    }),
     lex = le.create({
       // set to https://acme-v01.api.letsencrypt.org/directory in production
       server     : debug ? 'staging' : 'https://acme-v01.api.letsencrypt.org/directory',
       // If you wish to replace the default plugins, you may do so here
       //
-      challenges : { 'http-01' : Challenge.create({ webrootPath : '/tmp/acme-challenges' }) },
-      store      : store.create({ webrootPath : '/tmp/acme-challenges' }),
+      challenges : { 'http-01' : Challenge.create({ webrootPath : '~/letsencrypt/var/acme-challenges' }, function() { return true; }) },
+      store      : leStore,
 
       // You probably wouldn't need to replace the default sni handler
       // See https://github.com/Daplie/le-sni-auto if you think you do
@@ -64,7 +75,6 @@ function approveDomains(opts, certs, cb) {
   if (certs) {
     opts.domains = certs.altnames;
   } else {
-    opts.server = 'https://acme-v01.api.letsencrypt.org/directory';
     opts.email = 'john@studio110.eu';
     opts.agreeTos = true;
   }

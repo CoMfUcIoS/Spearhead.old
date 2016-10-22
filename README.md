@@ -45,6 +45,11 @@ alias pm2='authbind --deep pm2'
 ##### Note
 > if you have problems installing authbind or its not available on your device then there is a workaround at the bottom of this README.md file
 
+You also need to setcap to nodejs executable
+
+```sh
+sudo setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
+```
 
 Then install all dependencies and run the app
 ```sh
