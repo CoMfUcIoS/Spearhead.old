@@ -31,7 +31,7 @@ const requires = [
     //, sni: require('le-sni-auto').create({})
 
       approveDomains : approveDomains
-    }),
+    });
     // server = http.createServer((req, res) => {
     //   const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
     //       appPort = util.object.get(vhosts, host, vhosts['default']);
@@ -49,19 +49,20 @@ const requires = [
     //     return null;
     //   }
     // });
-    server = http.createServer(lex.middleware(redirecthttps())).listen(80, function() {
-      console.log('Listening for ACME http-01 challenges on', this.address());
-    });
 
 let client = {
   uuid : 'cerberus'
 };
 
+http.createServer(lex.middleware(redirecthttps())).listen(80, function() {
+  console.log('Listening for ACME http-01 challenges on', this.address());
+});
+
 https.createServer(lex.httpsOptions, lex.middleware((req, res) => {
   const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
       appPort = util.object.get(vhosts, host, vhosts['default']);
-
-  proxy.on('error', function(e) {
+  console.log(host);
+  proxy.on('error', (e) => {
     util.log(e);
   });
   if (typeof appPort !== 'undefined') {
@@ -102,10 +103,10 @@ util.log(`Cerberus is listening on port ${port}`);
 
 // check debug to see if we are live or not to publish to avahi some aliases.
 if (config.get('debug')) {
-  fs.access(config.get('avahiPath'), fs.F_OK, function(err) {
+  fs.access(config.get('avahiPath'), fs.F_OK, (err) => {
     if (!err) {
       // Then publish all subdomains from vhost
-      util.object.forOwn(vhosts, function(value, vhost) {
+      util.object.forOwn(vhosts, (value, vhost) => {
         avahiAlias.publish(vhost);
       });
       avahiAlias.publish('rpi.studio110.eu', true);
@@ -115,13 +116,13 @@ if (config.get('debug')) {
 
 wsClient.connect({ origin : 'cerberus', events : (connection) => {
   util.log('Cerberus Connected to Websocket!');
-  connection.on('error', function(error) {
+  connection.on('error', (error) => {
     util.log(`Cerberus ws Connection Error: ${error.toString()}`);
   });
-  connection.on('close', function() {
+  connection.on('close', () => {
     util.log('Cerberus ws echo-protocol Connection Closed');
   });
-  connection.on('message', function(message) {
+  connection.on('message', (message) => {
     message = JSON.parse(message.utf8Data);
     if (util.toType(message) !== 'object') {
       util.log('What i got smth without a type? Huh ?');
@@ -136,7 +137,7 @@ wsClient.connect({ origin : 'cerberus', events : (connection) => {
     }
   });
 
-  setTimeout(function() {
+  setTimeout(() => {
     util.log('Send a test mesage to medusa');
     connection.send(JSON.stringify({ to : 'medusa', message : { message : 'Hello Bitch !', type : 'uuid' } }));
   }, 5000);
