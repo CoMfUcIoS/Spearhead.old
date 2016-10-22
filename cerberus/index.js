@@ -19,7 +19,7 @@ const requires = [
     proxy = httpProxy.createProxyServer({}),
     port = config.get('ports.cerberus'),
     debug = config.get('debug'),
-    leStore = require('le-store-certbot').create({
+    leStore = store.create({
       configDir     : '~/letsencrypt/etc',          // or /etc/letsencrypt or wherever
       privkeyPath   : ':configDir/live/:hostname/privkey.pem',          //
       fullchainPath : ':configDir/live/:hostname/fullchain.pem',      // Note: both that :configDir and :hostname
@@ -30,12 +30,12 @@ const requires = [
       webrootPath   : '~/letsencrypt/srv/www/:hostname/.well-known/acme-challenge',
       debug         : debug
     }),
-    lex = require('letsencrypt-express').create({
+    lex = le.create({
       // set to https://acme-v01.api.letsencrypt.org/directory in production
       server     : debug ? 'staging' : 'https://acme-v01.api.letsencrypt.org/directory',
       // If you wish to replace the default plugins, you may do so here
       //
-      challenges : { 'http-01' : require('le-challenge-fs').create({ webrootPath : '~/letsencrypt/var/acme-challenges' }) },
+      challenges : { 'http-01' : Challenge.create({ webrootPath : '~/letsencrypt/var/acme-challenges' }) },
       store      : leStore,
 
       // You probably wouldn't need to replace the default sni handler
