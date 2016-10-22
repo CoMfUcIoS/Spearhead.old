@@ -70,8 +70,8 @@ function approveDomains(opts, certs, cb) {
   }
 
   // NOTE: you can also change other options such as `challengeType` and `challenge`
-  // opts.challengeType = 'http-01';
-  // opts.challenge = require('le-challenge-fs').create({});
+  opts.challengeType = 'http-01';
+  opts.challenge = Challenge.create({});
 
   cb(null, { options : opts, certs : certs });
 }
