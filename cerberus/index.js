@@ -35,7 +35,7 @@ const requires = [
       server     : debug ? 'staging' : 'https://acme-v01.api.letsencrypt.org/directory',
       // If you wish to replace the default plugins, you may do so here
       //
-      challenges : { 'http-01' : Challenge.create({ webrootPath : '~/letsencrypt/var/acme-challenges' }, function() { return true; }) },
+      challenges : { 'http-01' : Challenge.create({ webrootPath : '~/letsencrypt/var/acme-challenges' }) },
       store      : leStore,
 
       // You probably wouldn't need to replace the default sni handler
