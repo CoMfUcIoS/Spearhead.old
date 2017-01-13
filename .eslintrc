@@ -14,17 +14,22 @@
   "plugins": [
     "react"
   ],
-  "globals": [
+  "globals": {
+    "afterAll",
     "afterEach",
+    "after",
+    "beforeAll",
     "beforeEach",
+    "before",
     "describe",
     "expect",
     "fit",
     "it",
     "jest",
     "xdescribe",
-    "xit"
-  ],
+    "xit",
+    "spyOn"
+  },
   "parser": "babel-eslint",
   "parserOptions": {
     "ecmaFeatures": {

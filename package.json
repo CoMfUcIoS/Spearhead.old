@@ -1,4 +1,13 @@
 {
+  "scripts": {
+    "start": "npm run hydra && npm run cerberus && npm run medusa",
+    "cerberus": "authbind --deep pm2 start ./cerberus/index.js --name cerberus  --interpreter './node_modules/babel-cli/bin/babel-node.js' --watch true",
+    "medusa": "pm2 start ./medusa/index.js --name medusa  --interpreter './node_modules/babel-cli/bin/babel-node.js' --watch true",
+    "hydra": "pm2 start ./hydra/index.js --name hydra  --interpreter './node_modules/babel-cli/bin/babel-node.js' --watch true",
+    "kill": "pm2 kill",
+    "list": "pm2 l",
+    "buildDocs": "yuidoc ./ -o docs"
+  },
   "name": "spearhead",
   "version": "0.0.1",
   "description": "Ecosystem of the gods",
@@ -25,15 +34,6 @@
     "request": "^2.75.0",
     "uuid": "^2.0.3",
     "websocket": "^1.0.23"
-  },
-  "scripts": {
-    "start": "npm run hydra && npm run cerberus && npm run medusa",
-    "cerberus": "authbind --deep pm2 start ./cerberus/index.js --name cerberus  --interpreter './node_modules/babel-cli/bin/babel-node.js' --watch true",
-    "medusa": "pm2 start ./medusa/index.js --name medusa  --interpreter './node_modules/babel-cli/bin/babel-node.js' --watch true",
-    "hydra": "pm2 start ./hydra/index.js --name hydra  --interpreter './node_modules/babel-cli/bin/babel-node.js' --watch true",
-    "kill": "pm2 kill",
-    "list": "pm2 l",
-    "buildDocs": "yuidoc ./ -o docs"
   },
   "devDependencies": {
     "nodemon": "^1.10.2",

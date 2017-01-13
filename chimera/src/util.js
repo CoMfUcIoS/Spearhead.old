@@ -20,11 +20,25 @@ const util = (function() {
    */
   function _log(/* Something to log goes here */) {
     if (_config.get('debug')) {
-      var args = Array.prototype.slice.call(arguments);
+      const args = Array.prototype.slice.call(arguments);
+      let call;
+      call = _util.find(args, (o) => { //eslint-disable-line
+        if (_util.toType(o) === 'string') {
+          let str = o.toLowerCase();
+          if (str.indexOf('error:') > -1) {
+            return 'error';
+          } else if (str.indexOf('warn:') > -1) {
+            return 'warn';
+          }
+        }
+      });
+      call = (_util.toType(call) === 'undefined') ? 'info' : call;
+      args.unshift(`[APP] ${call.toUpperCase()}: ${new Date().toISOString().slice(11, -5)}`); //eslint-disable-line
       /*eslint-disable no-console*/
-      if (typeof console.log === 'function') { // This is added because jest tests uses console.warn with nodejs
-        console.log.apply(console, args);
-        console.log('============================================================');
+      if (typeof console[call] === 'function') { // This is added because jest tests uses console.warn with nodejs
+        console[call].apply(console, args);
+      } else {
+        console.log(args);
       }
       /*eslint-enable no-console*/
     }
@@ -51,8 +65,9 @@ const util = (function() {
    * @see util.object.sanity
    */
   function _checkSanity(obj, expected) {
-    var sanity    = true,
+    let sanity    = true,
         mandatory = 0,
+        type,
         objKeys;
 
     if (_isEmpty(obj) || _isEmpty(expected)) {
@@ -63,6 +78,12 @@ const util = (function() {
     Object.keys(expected).forEach(function(key) {
       if (_objectGet(expected[key], 'mandatory', false)) {
         mandatory++;
+      }
+      if (_objectGet(expected[key], 'type', false)) {
+        type = _objectGet(expected[key], 'type', false);
+        if (!type || typeof obj[key] !== type) {
+          sanity = false;
+        }
       }
     });
 
@@ -77,35 +98,23 @@ const util = (function() {
       return false;
     }
 
-    objKeys.forEach(function(key) {
-      var expectedKey = _objectGet(expected, key, null),
-          type        = _objectGet(expectedKey, 'type', null),
-          isMandatory = _objectGet(expectedKey, 'mandatory', false);
-
-      if (!isMandatory) {
-        return;
-      }
-
-      if (!type || typeof obj[key] !== type) {
-        sanity = false;
-      }
-    });
     return sanity;
   }
 
   /*!
-   * Gets the first element of array.
+   * Gets the first element of array or string.
    *
-   * @method head
+   * @method _head
    * @private
-   * @param   {Array}   array   The array to query.
-   * @return  {*}               Returns the first element of array.
+   * @param   {Array|String}   array   The array or string to query.
+   * @param   {Number}  [n]            The number of elements to take.
+   * @return  {*}                      Returns the first element of array or string.
    */
   function _head(array) {
-    if (_toType(array) === 'array') {
+    if (_toType(array) === 'array' || _toType(array) === 'string') {
       return array[0];
     }
-    return undefined;
+    return _util.noop;
   }
 
 
@@ -285,8 +294,13 @@ const util = (function() {
       return uuid.v4();
     },
 
+    /**
+     * Checks if a value is empty
+     *
+     * @method  _isEmpty
+     * @public
+    */
     isEmpty : _isEmpty,
-
 
     /**
      * This returns undefined.
@@ -313,6 +327,19 @@ const util = (function() {
      */
     hostname : function() {
       return os.hostname();
+    },
+
+    /**
+     * Creates a lodash wrapper instance that wraps value with explicit method chain sequences
+     * enabled. The result of such sequences must be unwrapped with _#value.
+     *
+     * @method chain
+     * @public
+     * @param  {*}      value  The value to wrap.
+     * @return {Object}        Returns the new lodash wrapper instance.
+     */
+    chain : function() {
+      return _.chain.apply(this, arguments);
     },
 
     /**
@@ -522,6 +549,18 @@ const util = (function() {
     },
 
     /**
+     * Recursively clones value
+     *
+     * @method   cloneDeep
+     * @public
+     * @param {*}   value   The value to clone.
+     * @return {*}          Returns the cloned value.
+     */
+    cloneDeep : function() {
+      return _.cloneDeep.apply(this, arguments);
+    },
+
+    /**
      * Checks if predicate returns truthy for any element of collection. Iteration is stopped once predicate
      * returns truthy. The predicate is invoked with three arguments: (value, index|key, collection).
      *
@@ -664,6 +703,18 @@ const util = (function() {
     },
 
     /**
+     * Returns true if the number passed is odd
+     *
+     * @method   isOdd
+     * @public
+     * @param    {Number}   num  Number to check
+     * @return   {Boolean}       True if it's odd, false otherwise
+     */
+    isOdd : function(num) {
+      return (num % 2 === 1);
+    },
+
+    /**
      * Escapes html from jsx files
      *
      * @method escapeHTML
@@ -701,11 +752,64 @@ const util = (function() {
     },
 
     /**
+     * Recursively flattens the array then maps the results.
+     *
+     * @method flatMapDeep
+     * @public
+     * @param  {Array}  array   The array to flatten.
+     * @return {Array}          Returns the new mapped flattened array.
+     */
+    flatMapDeep : function() {
+      return _.flatMapDeep.apply(this, arguments);
+    },
+
+    /**
      * The util.array component
      *
      * @class util.array
      */
     array : {
+
+      /**
+       * Computes the maximum value of array. If array is empty or falsey, undefined is returned.
+       * Accepts iteratee which is invoked for each element in array to generate the criterion by
+       * which the value is ranked.
+       *
+       * @method   maxBy
+       * @public
+       * @param   {Array}            array       The array to iterate over.
+       * @param   {Function|String}  [iteratee]  The iteratee invoked per element.
+       * @return  {*}                            Returns the maximum value
+       */
+      maxBy : function() {
+        return _.maxBy.apply(this, arguments);
+      },
+
+      /**
+       * Removes all elements from array that predicate returns truthy for and returns an array of the removed elements.
+       * The predicate is invoked with three arguments: (value, index, array).
+       *
+       * @method   remove
+       * @private
+       * @param  {Array}    array      The array to modify.
+       * @param  {Function} predicate  The function invoked per iteration.
+       * @return {Array}               Returns the new array of removed elements.
+       */
+      remove : function() {
+        return _.remove.apply(this, arguments);
+      },
+
+      /**
+       * Gets all but the first element of array.
+       *
+       * @method tail
+       * @public
+       * @param {Array}  array  Array to tail
+       * @return {Array}        Tailed array
+       */
+      tail : function() {
+        return _.tail.apply(this, arguments);
+      },
 
       /**
        * Computes the minimum value of array. If array is empty or falsey, undefined is returned.
@@ -729,6 +833,32 @@ const util = (function() {
        */
       max : function() {
         return _.max.apply(this, arguments);
+      },
+
+      /**
+       * Creates an array of unique values, in order, from all given arrays using SameValueZero for equality comparisons.
+       *
+       * @method union
+       * @public
+       * @param {...Array} arrays The arrays to inspect.
+       * @return {Array} Returns the new array of combined values.
+       */
+      union : function() {
+        return _.union.apply(this, arguments);
+      },
+
+      /**
+       * Creates an array of array values not included in the other given arrays using SameValueZero for equality comparisons.
+       * The order and references of result values are determined by the first array.
+       *
+       * @method difference
+       * @public
+       * @param {Array} array The array to inspect.
+       * @param {...Array} values The values to exclude.
+       * @return {Array} Returns the new array of filtered values.
+       */
+      difference : function() {
+        return _.difference.apply(this, arguments);
       },
 
       /**
@@ -785,15 +915,15 @@ const util = (function() {
        *
        * @method last
        * @public
-       * @param   {Array}   array  The array to query.
+       * @param   {Array|String}   array  The array to query.
        * @param   {Number}  [n]    The number of elements to take.
        * @return {*}               Returns the last element of array.
        */
       last : function(array) {
-        if (_toType(array) === 'array') {
+        if ((_toType(array) === 'array' || _toType(array) === 'string') && array.length > 0) {
           return array[array.length - 1];
         }
-        return undefined;
+        return _util.noop;
       },
 
       /**
@@ -832,6 +962,18 @@ const util = (function() {
        */
       flatten : function() {
         return _.flatten.apply(this, arguments);
+      },
+
+      /**
+       * Recursively flattens array.
+       *
+       * @method flattenDeep
+       * @public
+       * @param  {Array}  array   The array to flatten.
+       * @return {Array}          Returns the new flattened array.
+       */
+      flattenDeep : function() {
+        return _.flattenDeep.apply(this, arguments);
       },
 
       /**
@@ -935,10 +1077,26 @@ const util = (function() {
         if (newIndex >= array.length) {
           k = newIndex - array.length;
           while ((k--) + 1) {
-            array.push(undefined);
+            array.push(_util.noop);
           }
         }
         array.splice(newIndex, 0, array.splice(oldIndex, 1)[0]);
+      },
+
+      /**
+       * Swap two elements in an array
+       *
+       * @method  swap
+       * @public
+       * @param  {Array}  array    Array we want to change
+       * @param  {Number} oldIndex Old index the element lives
+       * @param  {Number} newIndex The new index we want to the element to be
+       */
+      swap : function(array, oldIndex, newIndex) {
+        let temp = array[oldIndex];
+
+        array[oldIndex] = array[newIndex];
+        array[newIndex] = temp;
       },
 
       /**
@@ -983,8 +1141,20 @@ const util = (function() {
         return JSON.stringify(arr1) === JSON.stringify(arr2);
       }
     },
-
+    /**
+     * The util.date component
+     *
+     * @class util.date
+     */
     date : {
+      /**
+       * Date formating for chart usage.
+       *
+       * @method   formatForChart
+       * @private
+       * @param    {Number}   timestamp  Timestamp
+       * @return   {String}              Formated date.
+       */
       formatForChart : function(timestamp) {
         if (!timestamp || isNaN(timestamp)) {
           return false;
@@ -1005,6 +1175,19 @@ const util = (function() {
      * @class util.object
      */
     object : {
+
+      /**
+       * Creates an object composed of the inverted keys and values of object. If object
+       * contains duplicate values, subsequent values overwrite property assignments of previous values.
+       *
+       * @method invert
+       * @public
+       * @param {Object}  object  The object to invert.
+       * @return {Object}         The new inverted object
+       */
+      invert : function() {
+        return _.invert.apply(this, arguments);
+      },
 
       /**
        * This method is like _.find except that it returns the key of the first element predicate
@@ -1101,7 +1284,7 @@ const util = (function() {
           return Object.keys(obj);
         } else {
           _log('util : object : keys : Value passed is not an object');
-          return null;
+          return _util.noop;
         }
       },
 
@@ -1279,6 +1462,34 @@ const util = (function() {
        */
       isObject : function() {
         return _.isObject.apply(this, arguments);
+      },
+
+      /**
+       * Creates an object composed of the own and inherited enumerable property
+       * paths of object that are not omitted.
+       *
+       * @method omit
+       * @public
+       * @param {Object} value  The object to loop over
+       * @param {*}      paths  The check for what should be omitted
+       * @return {Object} The newly created object
+       */
+      omit : function() {
+        return _.omit.apply(this, arguments);
+      },
+
+      /**
+       * Creates an object composed of the own and inherited enumerable string keyed properties of
+       * object that predicate doesn't return truthy for
+       *
+       * @method omit
+       * @public
+       * @param {Object} value  The object to loop over
+       * @param {*}      paths  The check for what should be omitted
+       * @return {Object} The newly created object
+       */
+      omitBy : function() {
+        return _.omitBy.apply(this, arguments);
       }
     },
 

@@ -53,7 +53,7 @@ const events = function() {
      * @param  {Function} callback Callback function
      */
     on : function(name, callback) {
-      _util.log('Started to listen to ' + name + ' event!');
+      _util.log(`Started to listen to ${name} event!`);
       _events.on(name, callback);
     },
 
@@ -67,7 +67,7 @@ const events = function() {
      * @param  {Function} callback Callback function
      */
     once : function(name, callback) {
-      _util.log('Started listening to ' + name + ' event for once!');
+      _util.log(`INFO: Started listening to ${name} event for once!`);
       _events.once(name, callback);
     },
 
@@ -80,7 +80,7 @@ const events = function() {
      * @param  {Function} callback Callback function
      */
     off : function(name, callback) {
-      _util.log('Stopped listening to ' + name + ' event!');
+      _util.log(`INFO: Stopped listening to ${name} event!`);
       _events.removeListener(name, callback);
     },
 
@@ -97,7 +97,7 @@ const events = function() {
           name = args[0];
 
       args.shift();
-      _util.log(name + ' event is triggered!');
+      _util.log(`INFO: ${name} event is triggered!`);
 
       _events.emit(name, args[0]);
     },
