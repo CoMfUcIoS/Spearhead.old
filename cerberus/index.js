@@ -7,7 +7,6 @@ import le         from 'letsencrypt-express';
 import Challenge  from 'le-challenge-fs';
 import store      from 'le-store-certbot';
 import redirecthttps from 'redirect-https';
-import spdy from 'spdy';
 
 const requires = [
       'util',
@@ -110,9 +109,7 @@ if (debug) {
 } else {
   // redirect traffic to https port
   http.createServer(lex.middleware(redirecthttps())).listen(80);
-  console.log('protocols', lex.httpsOptions.protocols);
-  lex.httpsOptions.protocols = ['h2', 'spdy/3.1', 'spdy/3', 'spdy/2', 'http/1.1', 'http/1.0'];
-  server = spdy.createServer(lex.httpsOptions, lex.middleware(proxyFun)).listen(443);
+  server = https.createServer(lex.httpsOptions, lex.middleware(proxyFun)).listen(443);
 }
 
 //
