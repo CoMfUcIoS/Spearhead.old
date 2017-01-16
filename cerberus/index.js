@@ -117,7 +117,6 @@ if (debug) {
 // WebSocket requests as well.
 //
 server.on('upgrade', function(req, socket, head) {
-  console.log('head', head);
   proxy.ws(req, socket, head, {
     target : 'ws://127.0.0.1:4730',
     ws     : true

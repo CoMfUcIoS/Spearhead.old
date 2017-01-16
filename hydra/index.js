@@ -9,7 +9,6 @@ const requires = [
     ],
     { config, util }  = chimera.initialize(requires),
     port = config.get('ports.hydra'),
-    // httpServer = (config.get('debug')) ? http.createServer(httpserver) : https.createServer(httpserver),
     httpServer = http.createServer(httpserverFn),
 
     wsServer = new Server({
@@ -50,10 +49,6 @@ function _itsOurOwnApp(app) {
       matchArr = app.match(/\w+\.\w+[.\w+]+/g),
       domain = util.array.isArray(matchArr) && matchArr[0],
       ownApp = (allowedOrigins.indexOf(app) > -1);
-  console.log('allowedOrigins', allowedOrigins);
-  console.log('ownApp', ownApp);
-  console.log('allowedSSLDomains', allowedSSLDomains);
-  console.log('domain', domain);
 
   return (!ownApp) ? (allowedSSLDomains.indexOf(domain) > -1) : true;
 }

@@ -44,7 +44,6 @@ body {
   var exampleSocket = new WebSocket('wss://ws.studio110.eu/', 'echo-protocol');
 
   exampleSocket.onmessage =  function(message) {
-    console.log(message);
     document.getElementById('msg').innerHTML = message.data;
   };
 </script>
