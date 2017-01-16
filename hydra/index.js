@@ -46,11 +46,16 @@ function originIsAllowed(origin) {
 
 function _itsOurOwnApp(app) {
   const allowedOrigins = Object.keys(config.get('ports')),
+      allowedSSLDomains = config.get('allowedSSLDomains'),
       matchArr = app.match(/\w+\.\w+[.\w+]+/g),
       domain = util.array.isArray(matchArr) && matchArr[0],
       ownApp = (allowedOrigins.indexOf(app) > -1);
+  console.log('allowedOrigins', allowedOrigins);
+  console.log('ownApp', ownApp);
+  console.log('allowedSSLDomains', allowedSSLDomains);
+  console.log('domain', domain);
 
-  return (!ownApp) ? (allowedOrigins.indexOf(domain) > -1) : true;
+  return (!ownApp) ? (allowedSSLDomains.indexOf(domain) > -1) : true;
 }
 
 
