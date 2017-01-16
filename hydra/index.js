@@ -47,9 +47,10 @@ function originIsAllowed(origin) {
 function _itsOurOwnApp(app) {
   const allowedOrigins = Object.keys(config.get('ports')),
       matchArr = app.match(/\w+\.\w+[.\w+]+/g),
-      domain = util.array.isArray(matchArr) && matchArr[0];
+      domain = util.array.isArray(matchArr) && matchArr[0],
+      ownApp = (allowedOrigins.indexOf(app) > -1);
 
-  return ((allowedOrigins.indexOf(app) > -1) || (allowedOrigins.indexOf(domain) > -1));
+  return (!ownApp) ? (allowedOrigins.indexOf(domain) > -1) : true;
 }
 
 

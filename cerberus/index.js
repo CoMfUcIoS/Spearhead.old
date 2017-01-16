@@ -65,8 +65,7 @@ const requires = [
 let client = {
       uuid : 'cerberus'
     },
-    server,
-    serverS;
+    server;
 
 function approveDomains(opts, certs, cb) {
   // This is where you check your database and associated
@@ -109,8 +108,8 @@ if (debug) {
 
 } else {
   // redirect traffic to https port
-  server = http.createServer(lex.middleware(redirecthttps())).listen(80);
-  serverS = https.createServer(lex.httpsOptions, lex.middleware(proxyFun)).listen(443);
+  http.createServer(lex.middleware(redirecthttps())).listen(80);
+  server = https.createServer(lex.httpsOptions, lex.middleware(proxyFun)).listen(443);
 }
 
 //
@@ -118,13 +117,6 @@ if (debug) {
 // WebSocket requests as well.
 //
 server.on('upgrade', function(req, socket, head) {
-  console.log('head', head);
-  proxy.ws(req, socket, head, {
-    target : 'ws://127.0.0.1:4730',
-    ws     : true
-  });
-});
-serverS.on('upgrade', function(req, socket, head) {
   console.log('head', head);
   proxy.ws(req, socket, head, {
     target : 'ws://127.0.0.1:4730',
