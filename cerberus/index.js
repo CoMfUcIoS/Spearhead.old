@@ -53,20 +53,19 @@ const requires = [
       });
       if (typeof appPort !== 'undefined') {
         proxy.web(req, res, {
-          target : `${(host === 'ws') ? 'ws' : 'http'}://127.0.0.1:${appPort}`,
-          ws     : (host === 'ws')
+          target : `http://127.0.0.1:${appPort}`
         });
         return true;
       } else {
         return null;
       }
     },
-    server = http.createServer(proxyFun),
     allowedSSLDomains = config.get('allowedSSLDomains');
 
 let client = {
-  uuid : 'cerberus'
-};
+      uuid : 'cerberus'
+    },
+    server;
 
 function approveDomains(opts, certs, cb) {
   // This is where you check your database and associated
@@ -95,6 +94,7 @@ function approveDomains(opts, certs, cb) {
 
 // check debug to see if we are live or not to publish to avahi some aliases plus to force ssl.
 if (debug) {
+  server = http.createServer(proxyFun);
   server.listen(port);
 
   fs.access(config.get('avahiPath'), fs.F_OK, (err) => {
@@ -109,9 +109,22 @@ if (debug) {
 } else {
   // redirect traffic to https port
   http.createServer(lex.middleware(redirecthttps())).listen(80);
-
-  https.createServer(lex.httpsOptions, lex.middleware(proxyFun)).listen(443);
+  server = https.createServer(lex.httpsOptions, lex.middleware(proxyFun)).listen(443);
 }
+
+//
+// Listen to the `upgrade` event and proxy the
+// WebSocket requests as well.
+//
+server.on('upgrade', function(req, socket, head) {
+  const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
+      appPort = util.object.get(vhosts, host, vhosts['default']);
+
+  proxy.ws(req, socket, head, {
+    target : `ws://127.0.0.1:${appPort}`,
+    ws     : true
+  });
+});
 
 util.log(`Cerberus is listening on port ${port}`);
 
