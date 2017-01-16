@@ -32,7 +32,7 @@ var options = {
   // **optional** SPDY-specific options
   spdy : {
     protocols : ['h2', 'spdy/3.1', 'http/1.1'],
-    plain     : true,
+    plain     : false,
 
     // **optional**
     // Parse first incoming X_FORWARDED_FOR frame and put it to the
