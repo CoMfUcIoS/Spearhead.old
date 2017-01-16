@@ -1,5 +1,4 @@
 import { server as Server } from 'websocket';
-import https                from 'https';
 import http                 from 'http';
 import chimera              from '../chimera/index.js';
 
@@ -10,7 +9,8 @@ const requires = [
     ],
     { config, util }  = chimera.initialize(requires),
     port = config.get('ports.hydra'),
-    httpServer = (config.get('debug')) ? http.createServer(httpserver) : https.createServer(httpserver),
+    // httpServer = (config.get('debug')) ? http.createServer(httpserver) : https.createServer(httpserver),
+    httpServer = http.createServer(httpserverFn),
 
     wsServer = new Server({
       httpServer,
@@ -27,8 +27,7 @@ httpServer.listen(port, function() {
   util.log(`Hydra server is listening on port ${port}`);
 });
 
-
-function httpserver(request, response) {
+function httpserverFn(request, response) {
   util.log((new Date()) + ' Received request for ' + request.url);
   response.writeHead(404);
   response.end();
@@ -47,13 +46,14 @@ function originIsAllowed(origin) {
 
 function _itsOurOwnApp(app) {
   const allowedOrigins = Object.keys(config.get('ports')),
-      domain = app.match(/\w+\.\w+[.\w+]+/g);
-  return ((allowedOrigins.indexOf(app) > -1) || (allowedOrigins.indexOf(domain[0]) > -1));
+      matchArr = app.match(/\w+\.\w+[.\w+]+/g),
+      domain = util.array.isArray(matchArr) && matchArr[0];
+
+  return ((allowedOrigins.indexOf(app) > -1) || (allowedOrigins.indexOf(domain) > -1));
 }
 
 
 wsServer.on('request', function(request) {
-  console.log(request);
   const origin = request.origin,
       ownApp = _itsOurOwnApp(origin),
       uuid = util.uuid();

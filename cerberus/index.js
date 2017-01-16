@@ -117,11 +117,8 @@ if (debug) {
 // WebSocket requests as well.
 //
 server.on('upgrade', function(req, socket, head) {
-  const host = req.headers.host.replace(/\.\w+.\w+/g, ''),
-      appPort = util.object.get(vhosts, host, vhosts['default']);
-
   proxy.ws(req, socket, head, {
-    target : `wss://127.0.0.1:${appPort}`,
+    target : 'ws://127.0.0.1:4730',
     ws     : true
   });
 });
