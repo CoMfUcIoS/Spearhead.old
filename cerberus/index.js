@@ -121,7 +121,7 @@ server.on('upgrade', function(req, socket, head) {
       appPort = util.object.get(vhosts, host, vhosts['default']);
 
   proxy.ws(req, socket, head, {
-    target : `ws://127.0.0.1:${appPort}`,
+    target : `wss://127.0.0.1:${appPort}`,
     ws     : true
   });
 });
