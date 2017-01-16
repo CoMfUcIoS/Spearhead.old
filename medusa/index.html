@@ -1,10 +1,3 @@
-<script>
-  var exampleSocket = new WebSocket('ws://localhost:4730/', 'echo-protocol');
-
-  exampleSocket.onmessage =  function(message) {
-    console.log(message);
-  };
-</script>
 <style>
 body {
     font-size: 13px;
@@ -14,6 +7,7 @@ body {
 }
 </style>
 <center>
+
 <pre>
 
 ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  ██╗ ██╗ ██████╗    ███████╗██╗   ██╗
@@ -42,4 +36,14 @@ body {
 
 
 <center> contact : <a href="mailto:john@studio110.eu"> john@studio110.eu</a> </center>
+
+<div id='msg'>asdfasdfasdfasdfasdf</div>
 </center>
+
+<script>
+  var exampleSocket = new WebSocket('wss://ws.studio110.eu/', 'echo-protocol');
+
+  exampleSocket.onmessage =  function(message) {
+    document.getElementById('msg').innerHTML = message.data;
+  };
+</script>
