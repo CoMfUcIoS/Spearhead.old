@@ -1,6 +1,5 @@
 import http       from 'http';
 import https      from 'https';
-import spdy       from 'spdy';
 import httpProxy  from 'http-proxy';
 import chimera    from '../chimera/index.js';
 import fs         from 'fs';
@@ -110,7 +109,7 @@ if (debug) {
 } else {
   // redirect traffic to https port
   http.createServer(lex.middleware(redirecthttps())).listen(80);
-  server = spdy.createServer(lex.httpsOptions, lex.middleware(proxyFun)).listen(443);
+  server = https.createServer(lex.httpsOptions, lex.middleware(proxyFun)).listen(443);
 }
 
 //
