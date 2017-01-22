@@ -8,6 +8,13 @@ import { renderToString } from 'react-dom/server';
 import { match, RouterContext } from 'react-router';
 import routes from './routes';
 import NotFoundPage from './components/NotFoundPage';
+import chimera from '../../chimera/index.js';
+
+const requires = [
+      'keymetrics'
+    ],
+    { keymetrics }  = chimera.initialize(requires),
+    keymetricsStart = keymetrics.start(); //eslint-disable-line
 
 // initialize the server and configure support for ejs templates
 const app = new Express();

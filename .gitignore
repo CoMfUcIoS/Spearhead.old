@@ -8,3 +8,6 @@ build
 /jUnit
 /*.todo
 !Project.todo
+*.lock
+/.tags
+/.tags_swap

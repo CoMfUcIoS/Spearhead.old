@@ -1,20 +1,20 @@
 {
-  "ports" : {
-    "medusa" : 1233,
-    "cerberus" : 80,
-    "hydra" : 4730
-  },
-  "vhosts": {
-    "default" : 1233,
-    "cerberus" : 1233,
-    "medusa" : 1233,
-    "ws": 4730
-  },
-  "debug" : true,
-  "avahiPath" : "/usr/sbin/avahi-daemon",
-  "allowedSSLDomains" : [
+  "allowedSSLDomains": [
     "rpi.studio110.eu",
     "ws.studio110.eu",
     "john.gotdns.ch"
-  ]
+  ],
+  "avahiPath": "/usr/sbin/avahi-daemon",
+  "debug": true,
+  "ports": {
+    "cerberus": 80,
+    "hydra": 4730,
+    "medusa": 1233
+  },
+  "vhosts": {
+    "cerberus": 1233,
+    "default": 1233,
+    "medusa": 1233,
+    "ws": 4730
+  }
 }

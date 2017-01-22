@@ -5,9 +5,11 @@ import chimera              from '../chimera/index.js';
 
 const requires = [
       'util',
-      'config'
+      'config',
+      'keymetrics'
     ],
-    { config, util }  = chimera.initialize(requires),
+    { config, util, keymetrics }  = chimera.initialize(requires),
+    keymetricsStart = keymetrics.start(), //eslint-disable-line
     port = config.get('ports.hydra'),
     httpServer = http.createServer(httpserverFn),
 

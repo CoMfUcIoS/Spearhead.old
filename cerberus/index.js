@@ -12,9 +12,11 @@ const requires = [
       'util',
       'config',
       'avahiAlias',
-      'wsClient'
+      'wsClient',
+      'keymetrics'
     ],
-    { config, util, avahiAlias, wsClient }  = chimera.initialize(requires),
+    { config, util, avahiAlias, wsClient, keymetrics }  = chimera.initialize(requires),
+    keymetricsStart = keymetrics.start(), //eslint-disable-line
     vhosts = config.get('vhosts'),
     proxy = httpProxy.createProxyServer({}),
     port = config.get('ports.cerberus'),

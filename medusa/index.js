@@ -4,9 +4,11 @@ import chimera from '../chimera/index.js';
 const requires = [
       'util',
       'config',
-      'wsClient'
+      'wsClient',
+      'keymetrics'
     ],
-    { util, config, wsClient }  = chimera.initialize(requires),
+    { util, config, wsClient, keymetrics }  = chimera.initialize(requires),
+    keymetricsStart = keymetrics.start(), //eslint-disable-line
     port = config.get('ports.medusa'),
     app = express();
 let client = {
