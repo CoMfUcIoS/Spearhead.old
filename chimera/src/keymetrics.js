@@ -12,28 +12,6 @@ const keymetrics = function() {
 
   let _util;
 
-  function _startAlerts() {
-    const  probe = pmx.probe();
-
-    probe.metric({
-      name  : 'CPU usage',
-      value : function() {
-            return cpu_usage; //eslint-disable-line
-      },
-      alert : {
-        mode   : 'threshold',
-        value  : 95,
-        msg    : 'Detected over 95% CPU usage', // optional
-        action : function() { //optional
-          _util.log('WARNING : Detected over 95% CPU usage');
-        },
-        cmp : function(value, threshold) { //optional
-          return (parseFloat(value) > threshold); // default check
-        }
-      }
-    });
-  }
-
   function _startHistorgram() {
     const probe = pmx.probe(),
         histogram = probe.histogram({
@@ -47,6 +25,7 @@ const keymetrics = function() {
       histogram.update(latency);
     }, 100);
   }
+
   /**
    * The keymetrics component
    *
@@ -83,7 +62,6 @@ const keymetrics = function() {
         ports   : true,  // Shows which ports your app is listening on (default: false)
       });
 
-      _startAlerts();
       _startHistorgram();
     }
   };
