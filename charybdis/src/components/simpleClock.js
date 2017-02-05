@@ -1,4 +1,4 @@
-import Inferno, { linkEvent } from 'inferno';
+import Inferno, { linkEvent } from 'inferno'; //eslint-disable-line
 import Component from 'inferno-component';
 
 export default class Clock extends Component {

@@ -29,7 +29,6 @@ _changeData	chimera/src/services/$sim.js	/^  function _changeData({ el, interval
 _changeKey	chimera/src/services/$sim.js	/^  function _changeKey({ el, key, keyType }) {$/;"	f
 _endPointCb./1.0/trendv2/getTrends	chimera/src/api.js	/^  _endPointCb = {$/;"	m
 _generateData	chimera/src/services/$sim.js	/^  function _generateData(module, intervalsRange) {$/;"	f
-_itsOurOwnApp	hydra/index.js	/^function _itsOurOwnApp(app) {$/;"	f
 _jsonData	chimera/src/services/$sim.js	/^  function _jsonData(folder, modules) {$/;"	f
 _makeBuild	webApp/webpack.config.js	/^function _makeBuild() {$/;"	f
 _setApiEndPoints	chimera/src/api.js	/^  function _setApiEndPoints(endPoints) {$/;"	f
@@ -198,7 +197,6 @@ history	package.json	/^    "history": "^4.5.1",$/;"	f
 http-proxy	package.json	/^    "http-proxy": "^1.16.2",$/;"	f
 http-server	package.json	/^    "http-server": "^0.9.0",$/;"	f
 http-server	webApp/package.json	/^    "http-server": "^0.9.0",$/;"	f
-httpserverFn	hydra/index.js	/^function httpserverFn(request, response) {$/;"	f
 hydra	config.json	/^    "hydra": 4730,$/;"	f
 hydra	package.json	/^    "hydra": "pm2 start .\/hydra\/index.js --name hydra  --interpreter '.\/node_modules\/babel-cli\/bin\/babel-node.js' --watch true",$/;"	f
 identity	medusa/overview.html	/^            function identity(x) { return x; }$/;"	f
@@ -251,7 +249,6 @@ onMouseLeave	medusa/overview.html	/^        function onMouseLeave(e) {$/;"	f
 onMouseMove	medusa/overview.html	/^		function onMouseMove(e) {$/;"	f
 onMouseMove	medusa/overview.html	/^        function onMouseMove(e) {$/;"	f
 onResize	medusa/overview.html	/^        function onResize() {$/;"	f
-originIsAllowed	hydra/index.js	/^function originIsAllowed(origin) {$/;"	f
 parseData	medusa/overview.html	/^        function parseData(d) {$/;"	f
 parseOptions	medusa/overview.html	/^        function parseOptions(opts) {$/;"	f
 path	chimera/src/server.js	/^      const _cert = {$/;"	p

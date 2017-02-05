@@ -3,7 +3,7 @@ import { Server } from 'http';
 import Express    from 'express';
 import Inferno    from 'inferno';
 import routes     from './routes';
-import Sockets from './Sockets';
+import Sockets    from './Sockets';
 import chimera    from '../../chimera/index.js';
 import NotFoundPage             from './components/NotFoundPage';
 import { renderToString }       from 'inferno-server';
@@ -47,7 +47,6 @@ app.get('*', (req, res) => {
 
   // generate the inferno markup for the current route
   if (matched) {
-    renderProps.framework = framework;
     // if the current route matched we have renderProps
     markup = renderToString(<RouterContext {...renderProps}/>);
   }

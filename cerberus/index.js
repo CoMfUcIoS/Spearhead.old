@@ -12,10 +12,10 @@ const requires = [
       'util',
       'config',
       'avahiAlias',
-      'wsClient',
+      '$websocket',
       'keymetrics'
     ],
-    { config, util, avahiAlias, wsClient, keymetrics }  = chimera.initialize(requires),
+    { config, util, avahiAlias, $websocket, keymetrics }  = chimera.initialize(requires),
     keymetricsStart = keymetrics.start(), //eslint-disable-line
     vhosts = config.get('vhosts'),
     proxy = httpProxy.createProxyServer({}),
@@ -127,7 +127,7 @@ server.on('upgrade', function(req, socket, head) {
 
 util.log(`Cerberus is listening on port ${port}`);
 
-wsClient.connect({ origin : 'cerberus', events : (connection) => {
+$websocket.client.connect({ origin : 'cerberus', events : (connection) => {
   util.log('Cerberus Connected to Websocket!');
   connection.on('error', (error) => {
     util.log(`Cerberus ws Connection Error: ${error.toString()}`);

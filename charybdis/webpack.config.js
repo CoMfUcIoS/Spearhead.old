@@ -50,9 +50,10 @@ const webpack = require('webpack'),
       },
       module : {
         loaders : [{
-          test   : path.join(__dirname, 'src'),
-          loader : ['babel-loader'],
-          query  : {
+          test    : path.join(__dirname, 'src'),
+          loader  : ['babel-loader'],
+          exclude : ['*.csr'],
+          query   : {
             cacheDirectory : 'babel_cache',
             presets        : ['es2015', 'stage-0'],
             plugins        : ['inferno']

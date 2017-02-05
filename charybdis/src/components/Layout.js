@@ -1,14 +1,15 @@
-import Inferno from 'inferno';
-import io from 'socket.io-client';
+import Inferno   from 'inferno';
+import io        from 'socket.io-client';
+import chimera   from '../../../chimera/index.js';
 import Component from 'inferno-component';
-import Clock from './simpleClock';
+import Clock     from './simpleClock';
 // import Gauge from './Gauge';
 
 export default class Layout extends Component {
 
   constructor(props) {
     super(props);
-
+    this.framework = chimera.initialize(['util', 'config', '$websocket']);
     this.socketIO = io('http://localhost:3000/ws');
   }
 
@@ -27,11 +28,11 @@ export default class Layout extends Component {
   }
 
   render() {
-
     return (
       <div>
         <Clock
           socket = {this.socketIO}
+          framework = {this.framework}
         />
       </div>
     );

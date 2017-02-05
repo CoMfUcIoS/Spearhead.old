@@ -4,10 +4,10 @@ import chimera from '../chimera/index.js';
 const requires = [
       'util',
       'config',
-      'wsClient',
+      '$websocket',
       'keymetrics'
     ],
-    { util, config, wsClient, keymetrics }  = chimera.initialize(requires),
+    { util, config, $websocket, keymetrics }  = chimera.initialize(requires),
     keymetricsStart = keymetrics.start(), //eslint-disable-line
     port = config.get('ports.medusa'),
     app = express();
@@ -26,7 +26,7 @@ app.listen(port, function() {
   util.log(`Medusa app listening on port ${port}!`);
 });
 
-wsClient.connect({ origin : 'medusa', events : (connection) => {
+$websocket.client.connect({ origin : 'medusa', events : (connection) => {
   util.log('Medusa Connected to Websocket!');
   connection.on('error', function(error) {
     util.log(`Medusa ws Connection Error: ${error.toString()}`);
