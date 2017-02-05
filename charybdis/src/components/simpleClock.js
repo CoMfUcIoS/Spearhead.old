@@ -40,12 +40,12 @@ export default class Clock extends Component {
 
   render() {
     const { memUsage, cpuUsage, time } = this.state,
-        newTime = new Date(time).toLocaleTimeString();
+        newTime = new Date(time); //.toLocaleTimeString();
     return (
       <div>
-        <span>{ `the time is ${newTime}` }</span><br />
-        <span>{`memory usage : ${memUsage || 0}%`}</span><br />
-        <span>{`cpu usage : ${cpuUsage || 0}%`}</span>
+        <span>{`${newTime}`}</span><br />
+        <span>{`Mem usage : ${memUsage || 0}%`}</span><br />
+        <span>{`Cpu usage : ${cpuUsage || 0}%`}</span><br />
       </div>
     );
   }

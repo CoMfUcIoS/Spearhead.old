@@ -119,7 +119,7 @@ const.cu	webApp/src/components/Flag.js	/^const data = {$/;"	p
 css-loader	package.json	/^    "css-loader": "^0.26.1",$/;"	f
 dbus-native	package.json	/^    "dbus-native": "^0.2.0",$/;"	f
 debug	config.json	/^  "debug": true,$/;"	f
-default	config.json	/^    "default": 1233,$/;"	f
+default	config.json	/^    "default": 3000,$/;"	f
 dependencies	mobileApp/package.json	/^  "dependencies": {$/;"	f
 dependencies	package.json	/^  "dependencies": {$/;"	f
 dependencies	webApp/package.json	/^  "dependencies": {$/;"	f

@@ -1,4 +1,9 @@
+$green: #008000;
+$black: #000;
+
 body {
-  background: #000;
-  color: #EEE
+  background: $black;
+  color: $green;
+  font-size: 13px;
+  font-weight: bold;
 }

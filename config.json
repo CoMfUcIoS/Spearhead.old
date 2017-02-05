@@ -14,7 +14,7 @@
   },
   "vhosts": {
     "cerberus": 1233,
-    "default": 1233,
+    "default": 3000,
     "medusa": 1233,
     "charybdis": 1233,
     "ws": 4730
