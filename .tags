@@ -62,7 +62,6 @@ babel-preset-react	webApp/package.json	/^    "babel-preset-react": "^6.11.1",$/;
 babel-preset-react-hmre	webApp/package.json	/^    "babel-preset-react-hmre": "^1.1.1",$/;"	f
 babel-preset-react-native	mobileApp/package.json	/^    "babel-preset-react-native": "1.9.0",$/;"	f
 babel-preset-stage-0	package.json	/^    "babel-preset-stage-0": "^6.22.0",$/;"	f
-babel-watch	package.json	/^    "babel-watch": "^2.0.5",$/;"	f
 bin	package.json	/^  "bin": {$/;"	f
 bindEvents	medusa/overview.html	/^        function bindEvents() {$/;"	f
 bindEvents	medusa/overview.html	/^        function bindEvents(plot, eventHolder) {$/;"	f
@@ -71,18 +70,20 @@ buildDocs	package.json	/^    "buildDocs": "yuidoc .\/ -o docs",$/;"	f
 canvasToAxisCoords	medusa/overview.html	/^        function canvasToAxisCoords(pos) {$/;"	f
 cerberus	config.json	/^    "cerberus": 1233,$/;"	f
 cerberus	config.json	/^    "cerberus": 80,$/;"	f
-cerberus	package.json	/^    "cerberus": "authbind --deep pm2 start .\/cerberus\/index.js --name cerberus  --interpreter '.\/node_modules\/babel-cli\/bin\/babel-node.js' --watch true",$/;"	f
+cerberus	package.json	/^    "cerberus": "authbind --deep pm2 start .\/cerberus\/index.js --name cerberus --interpreter '.\/node_modules\/babel-cli\/bin\/babel-node.js' --watch true",$/;"	f
 charybdis	config.json	/^    "charybdis": 1233,$/;"	f
 charybdis	config.json	/^    "charybdis": 3000$/;"	f
 charybdis	package.json	/^    "charybdis": "npm run charybdis:build && npm run charybdis:run",$/;"	f
 charybdis:build	package.json	/^    "charybdis:build": "cd charybdis\/ && NODE_ENV=production webpack -p && cd ..\/",$/;"	f
-charybdis:dev	package.json	/^    "charybdis:dev": "cd charybdis\/ && webpack-dev-server --progress --inline --hot",$/;"	f
-charybdis:run	package.json	/^    "charybdis:run": "NODE_ENV=production pm2 start .\/charybdis\/src\/server.js --name charybdis  --interpreter '.\/node_modules\/babel-cli\/bin\/babel-node.js' --watch true",$/;"	f
+charybdis:dev	package.json	/^    "charybdis:dev": "npm run charybdis:dev:build && babel-node --inspect .\/charybdis\/src\/server.js",$/;"	f
+charybdis:dev:build	package.json	/^    "charybdis:dev:build": "cd charybdis\/ && webpack --progress && cd ..\/",$/;"	f
+charybdis:run	package.json	/^    "charybdis:run": "NODE_ENV=production pm2 start .\/charybdis\/src\/server.js --name charybdis --interpreter '.\/node_modules\/babel-cli\/bin\/babel-node.js' --watch true",$/;"	f
 charybdis:single	package.json	/^    "charybdis:single": "http-server .\/charybdis\/src\/static",$/;"	f
 clear	medusa/overview.html	/^			function clear() {$/;"	f
 com.awesomeproject	mobileApp/android/app/src/main/java/com/awesomeproject/MainActivity.java	/^package com.awesomeproject;$/;"	p
 com.awesomeproject	mobileApp/android/app/src/main/java/com/awesomeproject/MainApplication.java	/^package com.awesomeproject;$/;"	p
 combine	medusa/overview.html	/^		function combine(data) {$/;"	f
+const	charybdis/src/routes.js	/^import Layout from '.\/components\/Layout';$/;"	f
 const	chimera/src/api.js	/^\/**$/;"	f
 const	chimera/src/avahiAlias.js	/^import { toASCII } from 'punycode';$/;"	f
 const	chimera/src/clients.js	/^import * as _storage from 'node-persist';$/;"	f
@@ -198,7 +199,7 @@ http-proxy	package.json	/^    "http-proxy": "^1.16.2",$/;"	f
 http-server	package.json	/^    "http-server": "^0.9.0",$/;"	f
 http-server	webApp/package.json	/^    "http-server": "^0.9.0",$/;"	f
 hydra	config.json	/^    "hydra": 4730,$/;"	f
-hydra	package.json	/^    "hydra": "pm2 start .\/hydra\/index.js --name hydra  --interpreter '.\/node_modules\/babel-cli\/bin\/babel-node.js' --watch true",$/;"	f
+hydra	package.json	/^    "hydra": "pm2 start .\/hydra\/index.js --name hydra --interpreter '.\/node_modules\/babel-cli\/bin\/babel-node.js' --watch true",$/;"	f
 identity	medusa/overview.html	/^            function identity(x) { return x; }$/;"	f
 idiom	mobileApp/ios/AwesomeProject/Images.xcassets/AppIcon.appiconset/Contents.json	/^      "idiom" : "iphone",$/;"	f
 images	mobileApp/ios/AwesomeProject/Images.xcassets/AppIcon.appiconset/Contents.json	/^  "images" : [$/;"	f
@@ -234,7 +235,7 @@ main	webApp/package.json	/^  "main": "src\/server.js",$/;"	f
 mainEnd	mobileApp/android/gradlew.bat	/^:mainEnd$/;"	l
 measureTickLabels	medusa/overview.html	/^        function measureTickLabels(axis) {$/;"	f
 medusa	config.json	/^    "medusa": 1233,$/;"	f
-medusa	package.json	/^    "medusa": "pm2 start .\/medusa\/index.js --name medusa  --interpreter '.\/node_modules\/babel-cli\/bin\/babel-node.js' --watch true",$/;"	f
+medusa	package.json	/^    "medusa": "pm2 start .\/medusa\/index.js --name medusa --interpreter '.\/node_modules\/babel-cli\/bin\/babel-node.js' --watch true",$/;"	f
 monitor	package.json	/^    "monitor": "^0.6.10",$/;"	f
 name	mobileApp/package.json	/^  "name": "AwesomeProject",$/;"	f
 name	package.json	/^  "name": "spearhead",$/;"	f

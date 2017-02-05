@@ -8,8 +8,9 @@ const browserHistory = createBrowserHistory();
 
 export default class AppRoutes extends Component {
   render() {
+    const nRoutes = routes({});
     return (
-      <Router history={browserHistory} children={routes} onUpdate={() => window.scrollTo(0, 0)}/>
+      <Router history={browserHistory} children={nRoutes} onUpdate={() => window.scrollTo(0, 0)}/>
     );
   }
 }

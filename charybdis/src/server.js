@@ -28,7 +28,8 @@ app.use(Express['static'](path.join(__dirname, 'static')));
 
 // universal routing and rendering
 app.get('*', (req, res) => {
-  const renderProps = match(routes, req.originalUrl);
+  const route = routes(framework),
+      renderProps = match(route, req.originalUrl);
   let markup;
 
   // in case of error display the error message
