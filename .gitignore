@@ -40,7 +40,7 @@ jspm_packages
 babel_cache
 
 # yarn lock file
-yarn.lock
+#yarn.lock
 
 # build folder
 build
@@ -55,3 +55,6 @@ test-results.xml
 
 # jUnit file
 jUnit
+
+# macOS Finder sh1t
+.DS_Store
