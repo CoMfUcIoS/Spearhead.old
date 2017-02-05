@@ -9,12 +9,14 @@
   "ports": {
     "cerberus": 80,
     "hydra": 4730,
-    "medusa": 1233
+    "medusa": 1233,
+    "charybdis": 3000
   },
   "vhosts": {
     "cerberus": 1233,
     "default": 1233,
     "medusa": 1233,
+    "charybdis": 1233,
     "ws": 4730
   }
 }

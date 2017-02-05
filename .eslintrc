@@ -7,12 +7,12 @@
     "qunit": true,
     "meteor": true
   },
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "extends": ["eslint:recommended", "plugin:inferno/recommended"],
   "ecmaFeatures": {
     "jsx": true
   },
   "plugins": [
-    "react"
+    "inferno"
   ],
   "globals": {
     "afterAll",
@@ -193,9 +193,10 @@
         "avoidEscape": true
       }
     ],
-    "react/jsx-uses-react": 1,
-    "react/jsx-no-undef": 2,
-    "react/wrap-multilines": 2,
+    "inferno/jsx-uses-inferno": 1,
+    "inferno/jsx-no-undef": 2,
+    "inferno/wrap-multilines": 2,
+    "inferno/prop-types": 0,
     "semi": ["error", "always"],
     "space-before-function-paren": [
       "warn",

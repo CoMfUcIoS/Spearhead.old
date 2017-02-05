@@ -73,10 +73,17 @@ const framework = (function() {
       // Fetch modules
       _fetchFiles('./src/');
 
-      mods.forEach((mod) =>{
-        // load the file of required.
-        _modules[mod] = require(_modules[mod])['default'];
-      });
+      if (_neededMods.length > 0) {
+        _neededMods.forEach((mod) =>{
+          // load the file of required.
+          _modules[mod] = require(_modules[mod])['default'];
+        });
+      } else {
+        // require everything
+        for (let mod in _modules) {
+          _modules[mod] = require(_modules[mod])['default'];
+        }
+      }
 
       Object.keys(_modules).forEach((key) => {
         //check if its in the mods array the user passed. if
