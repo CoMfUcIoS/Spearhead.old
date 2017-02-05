@@ -61,13 +61,13 @@
   "scripts": {
     "buildDocs": "yuidoc ./ -o docs",
     "cerberus": "authbind --deep pm2 start ./cerberus/index.js --name cerberus  --interpreter './node_modules/babel-cli/bin/babel-node.js' --watch true",
-    "charybdis": "cd charybdis/ && NODE_ENV=production webpack -p && cd ../ && NODE_ENV=production babel-node charybdis/src/server.js",
+    "charybdis": "cd charybdis/ && NODE_ENV=production webpack -p && cd ../ && NODE_ENV=production pm2 start ./charybdis/src/server.js --name charybdis  --interpreter './node_modules/babel-cli/bin/babel-node.js' --watch true",
     "charybdis:dev": "cd charybdis/ && webpack-dev-server --progress --inline --hot",
     "hydra": "pm2 start ./hydra/index.js --name hydra  --interpreter './node_modules/babel-cli/bin/babel-node.js' --watch true",
     "kill": "pm2 kill",
     "list": "pm2 l",
     "medusa": "pm2 start ./medusa/index.js --name medusa  --interpreter './node_modules/babel-cli/bin/babel-node.js' --watch true",
-    "start": "npm run hydra && npm run cerberus && npm run medusa"
+    "start": "npm run hydra && npm run cerberus && npm run medusa && npm run charybdis"
   },
   "version": "1.0.1"
 }
