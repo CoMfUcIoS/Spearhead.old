@@ -4,6 +4,7 @@
     "spearhead": "spearhead.js"
   },
   "dependencies": {
+    "compression": "^1.6.2",
     "dbus-native": "^0.2.0",
     "express": "^4.14.0",
     "history": "^4.5.1",

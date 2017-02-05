@@ -1,6 +1,7 @@
 import path       from 'path';
 import { Server } from 'http';
 import Express    from 'express';
+import compression from 'compression';
 import Inferno    from 'inferno';
 import routes     from './routes';
 import Sockets    from './Sockets';
@@ -16,6 +17,7 @@ const app                  = new Express(),
     { config, keymetrics } = framework,
     keymetricsStart        = keymetrics.start(), //eslint-disable-line
     port                   = config.get('ports.charybdis') || 3000,
+    cacheTime              = 86400000 * 365,     // 1 year
     sockets                = new Sockets(server, '/ws'); //eslint-disable-line
 
 let env;
@@ -24,13 +26,18 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // define the folder that will be used for static assets
-app.use(Express['static'](path.join(__dirname, 'static')));
+app.use(Express['static'](path.join(__dirname, 'static'), { maxAge : cacheTime }));
+app.use(compression());
 
 // universal routing and rendering
 app.get('*', (req, res) => {
   const route = routes(framework),
       renderProps = match(route, req.originalUrl);
   let markup;
+
+  if (!res.getHeader('Cache-Control')) {
+    res.setHeader('Cache-Control', 'public, max-age=' + (cacheTime));
+  }
 
   // in case of error display the error message
   if (!renderProps) {

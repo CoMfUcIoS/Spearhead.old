@@ -1,4 +1,4 @@
-import chimera              from '../chimera/index.js';
+import chimera from '../chimera/index.js';
 
 const requires = [
       'util',

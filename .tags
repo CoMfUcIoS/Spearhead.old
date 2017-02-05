@@ -83,6 +83,7 @@ clear	medusa/overview.html	/^			function clear() {$/;"	f
 com.awesomeproject	mobileApp/android/app/src/main/java/com/awesomeproject/MainActivity.java	/^package com.awesomeproject;$/;"	p
 com.awesomeproject	mobileApp/android/app/src/main/java/com/awesomeproject/MainApplication.java	/^package com.awesomeproject;$/;"	p
 combine	medusa/overview.html	/^		function combine(data) {$/;"	f
+compression	package.json	/^    "compression": "^1.6.2",$/;"	f
 const	charybdis/src/routes.js	/^import Layout from '.\/components\/Layout';$/;"	f
 const	chimera/src/api.js	/^\/**$/;"	f
 const	chimera/src/avahiAlias.js	/^import { toASCII } from 'punycode';$/;"	f
