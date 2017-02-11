@@ -30,6 +30,12 @@ const webpack = require('webpack'),
     },
 
     config = {
+      resolve : {
+        alias : {
+          'react'     : 'inferno-compat',
+          'react-dom' : 'inferno-compat'
+        }
+      },
       sassLoader : {
         data : '$debug: ' + debug + ';'
       },
