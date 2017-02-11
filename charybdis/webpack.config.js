@@ -32,8 +32,9 @@ const webpack = require('webpack'),
     config = {
       resolve : {
         alias : {
-          'react'     : 'inferno-compat',
-          'react-dom' : 'inferno-compat'
+          'react' : 'inferno-compat',
+          'react-dom' : 'inferno-compat',
+          'react-dom/server' : 'inferno-compat',
         }
       },
       sassLoader : {
@@ -65,7 +66,14 @@ const webpack = require('webpack'),
           }
         }]
       },
-      plugins : debug ? [] : [
+      plugins : debug ? [
+        new webpack.ProvidePlugin({
+          'Inferno' : 'react'
+        })
+      ] : [
+        new webpack.ProvidePlugin({
+            'Inferno' : 'react'
+        }),
         new ExtractTextPlugin('../css/style.css'),
         new webpack.DefinePlugin({
           'process.env.NODE_ENV' : JSON.stringify(process.env.NODE_ENV)
