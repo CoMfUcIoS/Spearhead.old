@@ -1,8 +1,8 @@
 // @flow
 
-import {cloneLayout, compact, correctBounds} from './utils';
+import { cloneLayout, compact, correctBounds } from './utils';
 
-import  {Layout} from './utils';
+import  { Layout } from './utils';
 
 /**
  * Given a width, find the highest breakpoint that matches is valid for it (width > breakpoint).
@@ -16,7 +16,7 @@ export function getBreakpointFromWidth(breakpoints, width) {
   let matching = sorted[0];
   for (let i = 1, len = sorted.length; i < len; i++) {
     const breakpointName = sorted[i];
-    if (width > breakpoints[breakpointName]) matching = breakpointName;
+    if (width > breakpoints[breakpointName]) { matching = breakpointName; }
   }
   return matching;
 }
@@ -30,7 +30,7 @@ export function getBreakpointFromWidth(breakpoints, width) {
  */
 export function getColsFromBreakpoint(breakpoint, cols) {
   if (!cols[breakpoint]) {
-    throw new Error("ResponsiveGridLayout: `cols` entry for breakpoint " + breakpoint + " is missing!");
+    throw new Error('ResponsiveGridLayout: `cols` entry for breakpoint ' + breakpoint + ' is missing!');
   }
   return cols[breakpoint];
 }
@@ -53,7 +53,7 @@ export function findOrGenerateResponsiveLayout(layouts, breakpoints,
                                                breakpoint, lastBreakpoint,
                                                cols, verticalCompact) {
   // If it already exists, just return it.
-  if (layouts[breakpoint]) return cloneLayout(layouts[breakpoint]);
+  if (layouts[breakpoint]) { return cloneLayout(layouts[breakpoint]); }
   // Find or generate the next layout
   let layout = layouts[lastBreakpoint];
   const breakpointsSorted = sortBreakpoints(breakpoints);
@@ -66,7 +66,7 @@ export function findOrGenerateResponsiveLayout(layouts, breakpoints,
     }
   }
   layout = cloneLayout(layout || []); // clone layout so we don't modify existing items
-  return compact(correctBounds(layout, {cols: cols}), verticalCompact);
+  return compact(correctBounds(layout, { cols : cols }), verticalCompact);
 }
 
 /**

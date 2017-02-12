@@ -2,31 +2,31 @@
 import Inferno   from 'inferno';
 import Component from 'inferno-component';
 import Resizable from './Resizable';
-import {Props as ResizableProps} from './Resizable';
+import { Props as ResizableProps } from './Resizable';
 
 // An example use of Resizable.
 export default class ResizableBox extends Component {
   static defaultProps = {
-    handleSize: [20,20]
+    handleSize : [20, 20]
   };
 
 
-  onResize (e, {element, size}) {
-    const {width, height} = size;
+  onResize(e, { element, size }) {
+    const { width, height } = size;
 
     if (this.props.onResize) {
       e.persist && e.persist();
-      this.setState(size, () => this.props.onResize(e, {element, size}));
+      this.setState(size, () => this.props.onResize(e, { element, size }));
     } else {
       this.setState(size);
     }
-  };
+  }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.width !== this.props.width || nextProps.height !== this.props.height) {
       this.setState({
-        width: nextProps.width,
-        height: nextProps.height
+        width  : nextProps.width,
+        height : nextProps.height
       });
     }
   }
@@ -35,8 +35,8 @@ export default class ResizableBox extends Component {
     // Basic wrapper around a Resizable instance.
     // If you use Resizable directly, you are responsible for updating the child component
     // with a new width and height.
-    const {handleSize, onResize, onResizeStart, onResizeStop, draggableOpts,
-         minConstraints, maxConstraints, lockAspectRatio, axis, width, height, ...props} = this.props;
+    const { handleSize, onResize, onResizeStart, onResizeStop, draggableOpts,
+         minConstraints, maxConstraints, lockAspectRatio, axis, width, height, ...props } = this.props;
     return (
       <Resizable
         handleSize={handleSize}
@@ -51,7 +51,7 @@ export default class ResizableBox extends Component {
         lockAspectRatio={lockAspectRatio}
         axis={axis}
         >
-        <div style={{width: this.state.width + 'px', height: this.state.height + 'px'}} {...props} />
+        <div style={{ width : this.state.width + 'px', height : this.state.height + 'px' }} {...props} />
       </Resizable>
     );
   }

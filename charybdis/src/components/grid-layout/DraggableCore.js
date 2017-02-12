@@ -1,25 +1,25 @@
 import Inferno, { linkEvent }  from 'inferno';
 import Component from 'inferno-component';
 import React from 'inferno-compat';
-import {matchesSelectorAndParentsTo, addEvent, removeEvent, addUserSelectStyles, getTouchIdentifier,
-        removeUserSelectStyles, styleHacks} from './utils/domFns';
-import {createCoreData, getControlPosition, snapToGrid} from './utils/positionFns';
-import {dontSetMe} from './utils/shims';
+import { matchesSelectorAndParentsTo, addEvent, removeEvent, addUserSelectStyles, getTouchIdentifier,
+        removeUserSelectStyles, styleHacks } from './utils/domFns';
+import { createCoreData, getControlPosition, snapToGrid } from './utils/positionFns';
+import { dontSetMe } from './utils/shims';
 import log from './utils/log';
 
-import {EventHandler} from './utils/types';
+import { EventHandler } from './utils/types';
 
 // Simple abstraction for dragging events names.
 const eventsFor = {
-  touch: {
-    start: 'touchstart',
-    move: 'touchmove',
-    stop: 'touchend'
+  touch : {
+    start : 'touchstart',
+    move  : 'touchmove',
+    stop  : 'touchend'
   },
-  mouse: {
-    start: 'mousedown',
-    move: 'mousemove',
-    stop: 'mouseup'
+  mouse : {
+    start : 'mousedown',
+    move  : 'mousemove',
+    stop  : 'mouseup'
   }
 };
 
@@ -38,18 +38,18 @@ export default class DraggableCore extends Component {
   static displayName = 'DraggableCore';
 
   static defaultProps = {
-    allowAnyClick: false, // by default only accept left click
-    cancel: null,
-    disabled: false,
-    enableUserSelectHack: true,
-    offsetParent: null,
-    handle: null,
-    grid: null,
-    transform: null,
-    onStart: function(){},
-    onDrag: function(){},
-    onStop: function(){},
-    onMouseDown: function(){}
+    allowAnyClick        : false, // by default only accept left click
+    cancel               : null,
+    disabled             : false,
+    enableUserSelectHack : true,
+    offsetParent         : null,
+    handle               : null,
+    grid                 : null,
+    transform            : null,
+    onStart              : function() {},
+    onDrag               : function() {},
+    onStop               : function() {},
+    onMouseDown          : function() {}
   };
 
   constructor(props) {
@@ -57,21 +57,21 @@ export default class DraggableCore extends Component {
 
     this.state = {
       touchIdentifier : null,
-      dragging: false,
-      lastX: NaN,
-      lastY: NaN
-    }
+      dragging        : false,
+      lastX           : NaN,
+      lastY           : NaN
+    };
   }
 
   componentWillUnmount() {
     // Remove any leftover event handlers. Remove both touch and mouse handlers in case
     // some browser quirk caused a touch event to fire during a mouse move, or vice versa.
-    const {ownerDocument} = Inferno.findDOMNode(this);
+    const { ownerDocument } = Inferno.findDOMNode(this);
     removeEvent(ownerDocument, eventsFor.mouse.move, () => this.handleDrag);
     removeEvent(ownerDocument, eventsFor.touch.move, () => this.handleDrag);
     removeEvent(ownerDocument, eventsFor.mouse.stop, () => this.handleDragStop);
     removeEvent(ownerDocument, eventsFor.touch.stop, () => this.handleDragStop);
-    if (this.props.enableUserSelectHack) removeUserSelectStyles(ownerDocument.body);
+    if (this.props.enableUserSelectHack) { removeUserSelectStyles(ownerDocument.body); }
   }
 
   handleDragStart(e) {
@@ -79,11 +79,11 @@ export default class DraggableCore extends Component {
     this.props.onMouseDown(e);
 
     // Only accept left-clicks.
-    if (!this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) return false;
+    if (!this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) { return false; }
 
     // Get nodes. Be sure to grab relative document (could be iframed)
     const domNode = Inferno.findDOMNode(this);
-    const {ownerDocument} = domNode;
+    const { ownerDocument } = domNode;
 
     // Short circuit if handle or cancel prop was provided and selector doesn't match.
     if (this.props.disabled ||
@@ -97,12 +97,12 @@ export default class DraggableCore extends Component {
     // distinguish between individual touches on multitouch screens by identifying which
     // touchpoint was set to this element.
     const touchIdentifier = getTouchIdentifier(e);
-    this.setState({touchIdentifier});
+    this.setState({ touchIdentifier });
 
     // Get the current drag point from the event. This is used as the offset.
     const position = getControlPosition(e, touchIdentifier, this);
-    if (position == null) return; // not possible but satisfies flow
-    const {x, y} = position;
+    if (position == null) { return; } // not possible but satisfies flow
+    const { x, y } = position;
 
     // Create an event object with all the data parents need to make a decision here.
     const coreEvent = createCoreData(this, x, y);
@@ -112,20 +112,20 @@ export default class DraggableCore extends Component {
     // Call event handler. If it returns explicit false, cancel.
     log('calling', this.props.onStart);
     const shouldUpdate = this.props.onStart(e, coreEvent);
-    if (shouldUpdate === false) return;
+    if (shouldUpdate === false) { return; }
 
     // Add a style to the body to disable user-select. This prevents text from
     // being selected all over the page.
-    if (this.props.enableUserSelectHack) addUserSelectStyles(ownerDocument.body);
+    if (this.props.enableUserSelectHack) { addUserSelectStyles(ownerDocument.body); }
 
     // Initiate dragging. Set the current x and y as offsets
     // so we know how much we've moved during the drag. This allows us
     // to drag elements around even if they have been moved, without issue.
     this.setState({
-      dragging: true,
+      dragging : true,
 
-      lastX: x,
-      lastY: y
+      lastX : x,
+      lastY : y
     });
 
     // Add events to the document directly so we catch when the user's mouse/touch moves outside of
@@ -133,25 +133,26 @@ export default class DraggableCore extends Component {
     // is a touch-capable device.
     addEvent(ownerDocument, dragEventFor.move, () => this.handleDrag);
     addEvent(ownerDocument, dragEventFor.stop, () => this.handleDragStop);
-  };
+  }
 
   handleDrag(e) {
 
     // Prevent scrolling on mobile devices, like ipad/iphone.
-    if (e.type === 'touchmove') e.preventDefault();
+    if (e.type === 'touchmove') { e.preventDefault(); }
 
     // Get the current drag point from the event. This is used as the offset.
     const position = getControlPosition(e, this.state.touchIdentifier, this);
-    if (position == null) return;
-    let {x, y} = position;
+    if (position == null) { return; }
+    let { x, y } = position;
 
     // Snap to grid if prop has been provided
-    if (x !== x) debugger;
+    if (x !== x) { debugger; }
 
     if (Array.isArray(this.props.grid)) {
-      let deltaX = x - this.state.lastX, deltaY = y - this.state.lastY;
+      let deltaX = x - this.state.lastX,
+          deltaY = y - this.state.lastY;
       [deltaX, deltaY] = snapToGrid(this.props.grid, deltaX, deltaY);
-      if (!deltaX && !deltaY) return; // skip useless drag
+      if (!deltaX && !deltaY) { return; } // skip useless drag
       x = this.state.lastX + deltaX, y = this.state.lastY + deltaY;
     }
 
@@ -177,30 +178,30 @@ export default class DraggableCore extends Component {
     }
 
     this.setState({
-      lastX: x,
-      lastY: y
+      lastX : x,
+      lastY : y
     });
-  };
+  }
 
   handleDragStop(e) {
-    if (!this.state.dragging) return;
+    if (!this.state.dragging) { return; }
 
     const position = getControlPosition(e, this.state.touchIdentifier, this);
-    if (position == null) return;
-    const {x, y} = position;
+    if (position == null) { return; }
+    const { x, y } = position;
     const coreEvent = createCoreData(this, x, y);
-    const {ownerDocument} = Inferno.findDOMNode(this);
+    const { ownerDocument } = Inferno.findDOMNode(this);
 
     // Remove user-select hack
-    if (this.props.enableUserSelectHack) removeUserSelectStyles(ownerDocument.body);
+    if (this.props.enableUserSelectHack) { removeUserSelectStyles(ownerDocument.body); }
 
     log('DraggableCore: handleDragStop: %j', coreEvent);
 
     // Reset the el.
     this.setState({
-      dragging: false,
-      lastX: NaN,
-      lastY: NaN
+      dragging : false,
+      lastX    : NaN,
+      lastY    : NaN
     });
 
     // Call event handler
@@ -210,19 +211,19 @@ export default class DraggableCore extends Component {
     log('DraggableCore: Removing handlers');
     removeEvent(ownerDocument, dragEventFor.move, () => this.handleDrag);
     removeEvent(ownerDocument, dragEventFor.stop, () => this.handleDragStop);
-  };
+  }
 
   onMouseDown(that) {
     dragEventFor = eventsFor.mouse; // on touchscreen laptops we could switch back to mouse
 
     return that.handleDragStart(event);
-  };
+  }
 
-  onMouseUp (that) {
+  onMouseUp(that) {
     dragEventFor = eventsFor.mouse;
 
     return that.handleDragStop(event);
-  };
+  }
 
   // Same as onMouseDown (start drag), but now consider this a touch device.
   onTouchStart(that) {
@@ -230,26 +231,26 @@ export default class DraggableCore extends Component {
     dragEventFor = eventsFor.touch;
 
     return that.handleDragStart(event);
-  };
+  }
 
   onTouchEnd(that) {
     // We're on a touch device now, so change the event handlers
     dragEventFor = eventsFor.touch;
 
     return that.handleDragStop(event);
-  };
+  }
 
   render() {
     // Reuse the child provided
     // This makes it flexible to use whatever element is wanted (div, ul, etc)
     return React.cloneElement(React.Children.only(this.props.children), {
-      style: styleHacks(this.props.children.props.style),
+      style        : styleHacks(this.props.children.props.style),
       // Note: mouseMove handler is attached to document so it will still function
       // when the user drags quickly and leaves the bounds of the element.
-      onMouseDown:  linkEvent(this, this.onMouseDown) ,
-      onTouchStart:  linkEvent(this, this.onTouchStart),
-      onMouseUp:  linkEvent(this, this.onMouseUp) ,
-      onTouchEnd:  linkEvent(this, this.onTouchEnd)
+      onMouseDown  : linkEvent(this, this.onMouseDown),
+      onTouchStart : linkEvent(this, this.onTouchStart),
+      onMouseUp    : linkEvent(this, this.onMouseUp),
+      onTouchEnd   : linkEvent(this, this.onTouchEnd)
     });
   }
 }

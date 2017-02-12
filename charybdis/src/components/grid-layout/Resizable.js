@@ -10,11 +10,11 @@ export default class Resizable extends Component {
   }
 
   static defaultProps =  {
-    handleSize: [20, 20],
-    lockAspectRatio: false,
-    axis: 'both',
-    minConstraints: [20, 20],
-    maxConstraints: [Infinity, Infinity]
+    handleSize      : [20, 20],
+    lockAspectRatio : false,
+    axis            : 'both',
+    minConstraints  : [20, 20],
+    maxConstraints  : [Infinity, Infinity]
   };
 
   componentWillReceiveProps(nextProps) {
@@ -22,8 +22,8 @@ export default class Resizable extends Component {
     if (!this.state.resizing &&
         (nextProps.width !== this.props.width || nextProps.height !== this.props.height)) {
       this.setState({
-        width: nextProps.width,
-        height: nextProps.height
+        width  : nextProps.width,
+        height : nextProps.height
       });
     }
   }
@@ -44,14 +44,14 @@ export default class Resizable extends Component {
       width = height * ratio;
     }
 
-    if (!min && !max) return [width, height];
+    if (!min && !max) { return [width, height]; }
 
     const [oldW, oldH] = [width, height];
 
     // Add slack to the values used to calculate bound position. This will ensure that if
     // we start removing slack, the element won't react to it right away until it's been
     // completely removed.
-    let {slackW, slackH} = this.state;
+    let { slackW, slackH } = this.state;
     width += slackW;
     height += slackH;
 
@@ -68,7 +68,7 @@ export default class Resizable extends Component {
     slackW += (oldW - width);
     slackH += (oldH - height);
     if (slackW !== this.state.slackW || slackH !== this.state.slackH) {
-      this.setState({slackW, slackH});
+      this.setState({ slackW, slackH });
     }
 
     return [width, height];
@@ -81,7 +81,7 @@ export default class Resizable extends Component {
    * @return {Function}           Handler function.
    */
   resizeHandler(handlerName) {
-    return (e, {node, deltaX, deltaY}) => {
+    return (e, { node, deltaX, deltaY }) => {
 
       // Axis restrictions
       const canDragX = this.props.axis === 'both' || this.props.axis === 'x';
@@ -92,8 +92,9 @@ export default class Resizable extends Component {
       let height = this.state.height + (canDragY ? deltaY : 0);
 
       // Early return if no change
-      const widthChanged = width !== this.state.width, heightChanged = height !== this.state.height;
-      if (handlerName === 'onResize' && !widthChanged && !heightChanged) return;
+      const widthChanged = width !== this.state.width,
+          heightChanged = height !== this.state.height;
+      if (handlerName === 'onResize' && !widthChanged && !heightChanged) { return; }
 
       [width, height] = this.runConstraints(width, height);
 
@@ -106,15 +107,15 @@ export default class Resizable extends Component {
         newState.slackW = newState.slackH = 0;
       } else {
         // Early return if no change after constraints
-        if (width === this.state.width && height === this.state.height) return;
+        if (width === this.state.width && height === this.state.height) { return; }
         newState.width = width;
         newState.height = height;
       }
 
       const hasCb = typeof this.props[handlerName] === 'function';
       if (hasCb) {
-        if (typeof e.persist === 'function') e.persist();
-        this.setState(newState, () => this.props[handlerName](e, {node, size: {width, height}}));
+        if (typeof e.persist === 'function') { e.persist(); }
+        this.setState(newState, () => this.props[handlerName](e, { node, size : { width, height } }));
       } else {
         this.setState(newState);
       }
@@ -123,12 +124,12 @@ export default class Resizable extends Component {
 
   render() {
     // eslint-disable-next-line no-unused-vars
-    const {children, draggableOpts, width, height, handleSize,
+    const { children, draggableOpts, width, height, handleSize,
         lockAspectRatio, axis, minConstraints, maxConstraints, onResize,
-        onResizeStop, onResizeStart, ...p} = this.props;
+        onResizeStop, onResizeStart, ...p } = this.props;
 
     const className = p.className ?
-      `${p.className} resizable`:
+      `${p.className} resizable` :
       'resizable';
     // What we're doing here is getting the child of this element, and cloning it with this element's props.
     // We are then defining its children as:
@@ -137,7 +138,7 @@ export default class Resizable extends Component {
     return cloneElement(children, {
       ...p,
       className,
-      children: [
+      children : [
         children.props.children,
         <DraggableCore
           {...draggableOpts}

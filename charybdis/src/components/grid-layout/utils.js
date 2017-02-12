@@ -12,10 +12,11 @@ const isProduction = process.env.NODE_ENV === 'production';
  * @return {Number}       Bottom coordinate.
  */
 export function bottom(layout) {
-  let max = 0, bottomY;
+  let max = 0,
+      bottomY;
   for (let i = 0, len = layout.length; i < len; i++) {
     bottomY = layout[i].y + layout[i].h;
-    if (bottomY > max) max = bottomY;
+    if (bottomY > max) { max = bottomY; }
   }
   return max;
 }
@@ -31,11 +32,11 @@ export function cloneLayout(layout) {
 // Fast path to cloning, since this is monomorphic
 export function cloneLayoutItem(layoutItem) {
   return {
-    w: layoutItem.w, h: layoutItem.h, x: layoutItem.x, y: layoutItem.y, i: layoutItem.i,
-    minW: layoutItem.minW, maxW: layoutItem.maxW, minH: layoutItem.minH, maxH: layoutItem.maxH,
-    moved: Boolean(layoutItem.moved), static: Boolean(layoutItem.static),
+    w           : layoutItem.w, h           : layoutItem.h, x           : layoutItem.x, y           : layoutItem.y, i           : layoutItem.i,
+    minW        : layoutItem.minW, maxW        : layoutItem.maxW, minH        : layoutItem.minH, maxH        : layoutItem.maxH,
+    moved       : Boolean(layoutItem.moved), static      : Boolean(layoutItem['static']),
     // These can be null
-    isDraggable: layoutItem.isDraggable, isResizable: layoutItem.isResizable
+    isDraggable : layoutItem.isDraggable, isResizable : layoutItem.isResizable
   };
 }
 
@@ -51,11 +52,11 @@ export function childrenEqual(a, b) {
  * Given two layoutitems, check if they collide.
  */
 export function collides(l1, l2) {
-  if (l1 === l2) return false; // same element
-  if (l1.x + l1.w <= l2.x) return false; // l1 is left of l2
-  if (l1.x >= l2.x + l2.w) return false; // l1 is right of l2
-  if (l1.y + l1.h <= l2.y) return false; // l1 is above l2
-  if (l1.y >= l2.y + l2.h) return false; // l1 is below l2
+  if (l1 === l2) { return false; } // same element
+  if (l1.x + l1.w <= l2.x) { return false; } // l1 is left of l2
+  if (l1.x >= l2.x + l2.w) { return false; } // l1 is right of l2
+  if (l1.y + l1.h <= l2.y) { return false; } // l1 is above l2
+  if (l1.y >= l2.y + l2.h) { return false; } // l1 is below l2
   return true; // boxes overlap
 }
 
@@ -80,7 +81,7 @@ export function compact(layout, verticalCompact) {
     let l = cloneLayoutItem(sorted[i]);
 
     // Don't move static elements
-    if (!l.static) {
+    if (!l['static']) {
       l = compactItem(compareWith, l, verticalCompact);
 
       // Add to comparison array. We only collide with items before this one.
@@ -116,7 +117,7 @@ export function compactItem(compareWith, l, verticalCompact) {
 
   // Move it down, and keep moving it down if it's colliding.
   let collides;
-  while((collides = getFirstCollision(compareWith, l))) {
+  while ((collides = getFirstCollision(compareWith, l))) {
     l.y = collides.y + collides.h;
   }
   return l;
@@ -133,17 +134,16 @@ export function correctBounds(layout, bounds) {
   for (let i = 0, len = layout.length; i < len; i++) {
     const l = layout[i];
     // Overflows right
-    if (l.x + l.w > bounds.cols) l.x = bounds.cols - l.w;
+    if (l.x + l.w > bounds.cols) { l.x = bounds.cols - l.w; }
     // Overflows left
     if (l.x < 0) {
       l.x = 0;
       l.w = bounds.cols;
     }
-    if (!l.static) collidesWith.push(l);
-    else {
+    if (!l['static']) { collidesWith.push(l); }    else {
       // If this is static and collides with other statics, we must move it down.
       // We have to do something nicer than just letting them overlap.
-      while(getFirstCollision(collidesWith, l)) {
+      while (getFirstCollision(collidesWith, l)) {
         l.y++;
       }
     }
@@ -160,7 +160,7 @@ export function correctBounds(layout, bounds) {
  */
 export function getLayoutItem(layout, id) {
   for (let i = 0, len = layout.length; i < len; i++) {
-    if (layout[i].i === id) return layout[i];
+    if (layout[i].i === id) { return layout[i]; }
   }
 }
 
@@ -174,7 +174,7 @@ export function getLayoutItem(layout, id) {
  */
 export function getFirstCollision(layout, layoutItem) {
   for (let i = 0, len = layout.length; i < len; i++) {
-    if (collides(layout[i], layoutItem)) return layout[i];
+    if (collides(layout[i], layoutItem)) { return layout[i]; }
   }
 }
 
@@ -188,7 +188,7 @@ export function getAllCollisions(layout, layoutItem) {
  * @return {Array}        Array of static layout items..
  */
 export function getStatics(layout) {
-  return layout.filter((l) => l.static);
+  return layout.filter((l) => l['static']);
 }
 
 /**
@@ -202,15 +202,15 @@ export function getStatics(layout) {
  *                                     being dragged/resized by the user.
  */
 export function moveElement(layout, l, x, y, isUserAction) {
-  if (l.static) return layout;
+  if (l['static']) { return layout; }
 
   // Short-circuit if nothing to do.
-  if (l.y === y && l.x === x) return layout;
+  if (l.y === y && l.x === x) { return layout; }
 
   const movingUp = y && l.y > y;
   // This is quite a bit faster than extending the object
-  if (typeof x === 'number') l.x = x;
-  if (typeof y === 'number') l.y = y;
+  if (typeof x === 'number') { l.x = x; }
+  if (typeof y === 'number') { l.y = y; }
   l.moved = true;
 
   // If this collides with anything, move it.
@@ -218,7 +218,7 @@ export function moveElement(layout, l, x, y, isUserAction) {
   // to ensure, in the case of multiple collisions, that we're getting the
   // nearest collision.
   let sorted = sortLayoutItemsByRowCol(layout);
-  if (movingUp) sorted = sorted.reverse();
+  if (movingUp) { sorted = sorted.reverse(); }
   const collisions = getAllCollisions(sorted, l);
 
   // Move each item that collides away from this element.
@@ -227,13 +227,13 @@ export function moveElement(layout, l, x, y, isUserAction) {
     // console.log('resolving collision between', l.i, 'at', l.y, 'and', collision.i, 'at', collision.y);
 
     // Short circuit so we can't infinite loop
-    if (collision.moved) continue;
+    if (collision.moved) { continue; }
 
     // This makes it feel a bit more precise by waiting to swap for just a bit when moving up.
-    if (l.y > collision.y && l.y - collision.y > collision.h / 4) continue;
+    if (l.y > collision.y && l.y - collision.y > collision.h / 4) { continue; }
 
     // Don't move static items - we have to move *this* element away
-    if (collision.static) {
+    if (collision['static']) {
       layout = moveElementAwayFromCollision(layout, collision, l, isUserAction);
     } else {
       layout = moveElementAwayFromCollision(layout, l, collision, isUserAction);
@@ -262,11 +262,11 @@ export function moveElementAwayFromCollision(layout, collidesWith,
   if (isUserAction) {
     // Make a mock item so we don't modify the item here, only modify in moveElement.
     const fakeItem = {
-      x: itemToMove.x,
-      y: itemToMove.y,
-      w: itemToMove.w,
-      h: itemToMove.h,
-      i: '-1'
+      x : itemToMove.x,
+      y : itemToMove.y,
+      w : itemToMove.w,
+      h : itemToMove.h,
+      i : '-1'
     };
     fakeItem.y = Math.max(collidesWith.y - itemToMove.h, 0);
     if (!getFirstCollision(layout, fakeItem)) {
@@ -289,28 +289,28 @@ export function perc(num) {
   return num * 100 + '%';
 }
 
-export function setTransform({top, left, width, height}) {
+export function setTransform({ top, left, width, height }) {
   // Replace unitless items with px
   const translate = `translate(${left}px,${top}px)`;
   return {
-    transform: translate,
-    WebkitTransform: translate,
-    MozTransform: translate,
-    msTransform: translate,
-    OTransform: translate,
-    width: `${width}px`,
-    height: `${height}px`,
-    position: 'absolute'
+    transform       : translate,
+    WebkitTransform : translate,
+    MozTransform    : translate,
+    msTransform     : translate,
+    OTransform      : translate,
+    width           : `${width}px`,
+    height          : `${height}px`,
+    position        : 'absolute'
   };
 }
 
-export function setTopLeft({top, left, width, height}) {
+export function setTopLeft({ top, left, width, height }) {
   return {
-    top: `${top}px`,
-    left: `${left}px`,
-    width: `${width}px`,
-    height: `${height}px`,
-    position: 'absolute'
+    top      : `${top}px`,
+    left     : `${left}px`,
+    width    : `${width}px`,
+    height   : `${height}px`,
+    position : 'absolute'
   };
 }
 
@@ -349,7 +349,7 @@ export function synchronizeLayoutWithChildren(initialLayout, children,
   let layout = [];
   React.Children.forEach(children, (child, i) => {
     // Don't overwrite if it already exists.
-    const exists = getLayoutItem(initialLayout, child.key || "1" /* FIXME satisfies Flow */);
+    const exists = getLayoutItem(initialLayout, child.key || '1' /* FIXME satisfies Flow */);
     if (exists) {
       layout[i] = cloneLayoutItem(exists);
     } else {
@@ -365,16 +365,16 @@ export function synchronizeLayoutWithChildren(initialLayout, children,
           validateLayout([g], 'GridLayout.children');
         }
 
-        layout[i] = cloneLayoutItem({...g, i: child.key});
+        layout[i] = cloneLayoutItem({ ...g, i : child.key });
       } else {
         // Nothing provided: ensure this is added to the bottom
-        layout[i] = cloneLayoutItem({w: 1, h: 1, x: 0, y: bottom(layout), i: child.key || "1"});
+        layout[i] = cloneLayoutItem({ w : 1, h : 1, x : 0, y : bottom(layout), i : child.key || '1' });
       }
     }
   });
 
   // Correct the layout.
-  layout = correctBounds(layout, {cols: cols});
+  layout = correctBounds(layout, { cols : cols });
   layout = compact(layout, verticalCompact);
 
   return layout;
@@ -388,9 +388,9 @@ export function synchronizeLayoutWithChildren(initialLayout, children,
  * @throw  {Error}                Validation error.
  */
 export function validateLayout(layout, contextName) {
-  contextName = contextName || "Layout";
+  contextName = contextName || 'Layout';
   const subProps = ['x', 'y', 'w', 'h'];
-  if (!Array.isArray(layout)) throw new Error(contextName + " must be an array!");
+  if (!Array.isArray(layout)) { throw new Error(contextName + ' must be an array!'); }
   for (let i = 0, len = layout.length; i < len; i++) {
     const item = layout[i];
     for (let j = 0; j < subProps.length; j++) {
@@ -401,7 +401,7 @@ export function validateLayout(layout, contextName) {
     if (item.i && typeof item.i !== 'string') {
       throw new Error('GridLayout: ' + contextName + '[' + i + '].i must be a string!');
     }
-    if (item.static !== undefined && typeof item.static !== 'boolean') {
+    if (item['static'] !== undefined && typeof item['static'] !== 'boolean') {
       throw new Error('GridLayout: ' + contextName + '[' + i + '].static must be a boolean!');
     }
   }

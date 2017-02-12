@@ -1,8 +1,8 @@
 // @flow
-import {findInArray, isFunction, int} from './shims';
-import browserPrefix, {getPrefix, browserPrefixToStyle, browserPrefixToKey} from './getPrefix';
+import { findInArray, isFunction, int } from './shims';
+import browserPrefix, { getPrefix, browserPrefixToStyle, browserPrefixToKey } from './getPrefix';
 
-import {ControlPosition} from './types';
+import { ControlPosition } from './types';
 
 let matchesSelectorFunc = '';
 export function matchesSelector(el, selector) {
@@ -13,7 +13,7 @@ export function matchesSelector(el, selector) {
       'mozMatchesSelector',
       'msMatchesSelector',
       'oMatchesSelector'
-    ], function(method){
+    ], function(method) {
       // $FlowIgnore: Doesn't think elements are indexable
       return isFunction(el[method]);
     });
@@ -27,8 +27,8 @@ export function matchesSelector(el, selector) {
 export function matchesSelectorAndParentsTo(el, selector, baseNode) {
   let node = el;
   do {
-    if (matchesSelector(node, selector)) return true;
-    if (node === baseNode) return false;
+    if (matchesSelector(node, selector)) { return true; }
+    if (node === baseNode) { return false; }
     node = node.parentNode;
   } while (node);
 
@@ -97,20 +97,20 @@ export function innerWidth(node) {
 // Get from offsetParent
 export function offsetXYFromParent(evt, offsetParent) {
   const isBody = offsetParent === offsetParent.ownerDocument.body;
-  const offsetParentRect = isBody ? {left: 0, top: 0} : offsetParent.getBoundingClientRect();
+  const offsetParentRect = isBody ? { left : 0, top : 0 } : offsetParent.getBoundingClientRect();
 
   const x = evt.clientX + offsetParent.scrollLeft - offsetParentRect.left;
   const y = evt.clientY + offsetParent.scrollTop - offsetParentRect.top;
 
-  return {x, y};
+  return { x, y };
 }
 
-export function createCSSTransform({x, y}) {
+export function createCSSTransform({ x, y }) {
   // Replace unitless items with px
-  return {[browserPrefixToKey('transform', browserPrefix)]: 'translate(' + x + 'px,' + y + 'px)'};
+  return { [browserPrefixToKey('transform', browserPrefix)] : 'translate(' + x + 'px,' + y + 'px)' };
 }
 
-export function createSVGTransform({x, y}) {
+export function createSVGTransform({ x, y }) {
   return 'translate(' + x + ',' + y + ')';
 }
 
@@ -120,8 +120,8 @@ export function getTouch(e, identifier) {
 }
 
 export function getTouchIdentifier(e) {
-  if (e.targetTouches && e.targetTouches[0]) return e.targetTouches[0].identifier;
-  if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].identifier;
+  if (e.targetTouches && e.targetTouches[0]) { return e.targetTouches[0].identifier; }
+  if (e.changedTouches && e.changedTouches[0]) { return e.changedTouches[0].identifier; }
 }
 
 // User-select Hacks:
@@ -135,7 +135,7 @@ const userSelectReplaceRegExp = new RegExp(`;?${userSelect}: none;`); // leading
 // Note we're passing `document` b/c we could be iframed
 export function addUserSelectStyles(body) {
   const style = body.getAttribute('style') || '';
-  if (userSelectReplaceRegExp.test(style)) return; // don't add twice
+  if (userSelectReplaceRegExp.test(style)) { return; } // don't add twice
   body.setAttribute('style', style + userSelectStyle);
 }
 
@@ -148,7 +148,7 @@ export function styleHacks(childStyle) {
   // Workaround IE pointer events; see #51
   // https://github.com/mzabriskie/react-draggable/issues/51#issuecomment-103488278
   return {
-    touchAction: 'none',
+    touchAction : 'none',
     ...childStyle
   };
 }

@@ -2,12 +2,12 @@ import Inferno   from 'inferno';
 import Component from 'inferno-component';
 import React from 'inferno-compat';
 import isEqual from 'lodash.isequal';
-import {autoBindHandlers, bottom, childrenEqual, cloneLayoutItem, compact, getLayoutItem, moveElement,
-  synchronizeLayoutWithChildren, validateLayout} from './utils';
+import { autoBindHandlers, bottom, childrenEqual, cloneLayoutItem, compact, getLayoutItem, moveElement,
+  synchronizeLayoutWithChildren, validateLayout } from './utils';
 import GridItem from './GridItem';
 const noop = function() {};
 
-import {ResizeEvent, DragEvent, Layout, LayoutItem} from './utils';
+import { ResizeEvent, DragEvent, Layout, LayoutItem } from './utils';
 
 
 /**
@@ -16,45 +16,45 @@ import {ResizeEvent, DragEvent, Layout, LayoutItem} from './utils';
 
 export default class GridLayout extends Component {
   // TODO publish internal ReactClass displayName transform
-  static displayName = "GridLayout";
+  static displayName = 'GridLayout';
 
   static defaultProps = {
-    autoSize: true,
-    cols: 12,
-    className: '',
-    rowHeight: 150,
-    maxRows: Infinity, // infinite vertical growth
-    layout: [],
-    margin: [10, 10],
-    isDraggable: true,
-    isResizable: true,
-    useCSSTransforms: true,
-    verticalCompact: true,
-    onLayoutChange: noop,
-    onDragStart: noop,
-    onDrag: noop,
-    onDragStop: noop,
-    onResizeStart: noop,
-    onResize: noop,
-    onResizeStop: noop
+    autoSize         : true,
+    cols             : 12,
+    className        : '',
+    rowHeight        : 150,
+    maxRows          : Infinity, // infinite vertical growth
+    layout           : [],
+    margin           : [10, 10],
+    isDraggable      : true,
+    isResizable      : true,
+    useCSSTransforms : true,
+    verticalCompact  : true,
+    onLayoutChange   : noop,
+    onDragStart      : noop,
+    onDrag           : noop,
+    onDragStop       : noop,
+    onResizeStart    : noop,
+    onResize         : noop,
+    onResizeStop     : noop
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      activeDrag: null,
-      layout: synchronizeLayoutWithChildren(props.layout, props.children,
+      activeDrag : null,
+      layout     : synchronizeLayoutWithChildren(props.layout, props.children,
                                             props.cols, props.verticalCompact),
-      mounted: false,
-      oldDragItem: null,
-      oldLayout: null,
-      oldResizeItem: null,
+      mounted       : false,
+      oldDragItem   : null,
+      oldLayout     : null,
+      oldResizeItem : null,
     };
     autoBindHandlers(this, ['onDragStart', 'onDrag', 'onDragStop', 'onResizeStart', 'onResize', 'onResizeStop']);
   }
 
   componentDidMount() {
-    this.setState({mounted: true});
+    this.setState({ mounted : true });
     // Possibly call back with layout on mount. This should be done after correcting the layout width
     // to ensure we don't rerender with the wrong width.
     this.onLayoutMaybeChanged(this.state.layout, this.props.layout);
@@ -79,7 +79,7 @@ export default class GridLayout extends Component {
       const newLayout = synchronizeLayoutWithChildren(newLayoutBase, nextProps.children,
                                                       nextProps.cols, nextProps.verticalCompact);
       const oldLayout = this.state.layout;
-      this.setState({layout: newLayout});
+      this.setState({ layout : newLayout });
       this.onLayoutMaybeChanged(newLayout, oldLayout);
     }
   }
@@ -89,7 +89,7 @@ export default class GridLayout extends Component {
    * @return {String} Container height in pixels.
    */
   containerHeight() {
-    if (!this.props.autoSize) return;
+    if (!this.props.autoSize) { return; }
     const nbRow = bottom(this.state.layout);
     const containerPaddingY = this.props.containerPadding ? this.props.containerPadding[1] : this.props.margin[1];
     return nbRow * this.props.rowHeight + (nbRow - 1) * this.props.margin[1] + containerPaddingY * 2 + 'px';
@@ -103,12 +103,12 @@ export default class GridLayout extends Component {
    * @param {Event} e The mousedown event
    * @param {Element} node The current dragging DOM element
    */
-  onDragStart(i, x, y, {e, node}) {
-    const {layout} = this.state;
+  onDragStart(i, x, y, { e, node }) {
+    const { layout } = this.state;
     var l = getLayoutItem(layout, i);
-    if (!l) return;
+    if (!l) { return; }
 
-    this.setState({oldDragItem: cloneLayoutItem(l), oldLayout: this.state.layout});
+    this.setState({ oldDragItem : cloneLayoutItem(l), oldLayout : this.state.layout });
 
     this.props.onDragStart(layout, l, l, null, e, node);
   }
@@ -121,15 +121,15 @@ export default class GridLayout extends Component {
    * @param {Event} e The mousedown event
    * @param {Element} node The current dragging DOM element
    */
-  onDrag(i, x, y, {e, node}) {
-    const {oldDragItem} = this.state;
-    let {layout} = this.state;
+  onDrag(i, x, y, { e, node }) {
+    const { oldDragItem } = this.state;
+    let { layout } = this.state;
     var l = getLayoutItem(layout, i);
-    if (!l) return;
+    if (!l) { return; }
 
     // Create placeholder (display only)
     var placeholder = {
-      w: l.w, h: l.h, x: l.x, y: l.y, placeholder: true, i: i
+      w           : l.w, h           : l.h, x           : l.x, y           : l.y, placeholder : true, i           : i
     };
 
     // Move the element to the dragged location.
@@ -138,8 +138,8 @@ export default class GridLayout extends Component {
     this.props.onDrag(layout, oldDragItem, l, placeholder, e, node);
 
     this.setState({
-      layout: compact(layout, this.props.verticalCompact),
-      activeDrag: placeholder
+      layout     : compact(layout, this.props.verticalCompact),
+      activeDrag : placeholder
     });
   }
 
@@ -151,11 +151,11 @@ export default class GridLayout extends Component {
    * @param {Event} e The mousedown event
    * @param {Element} node The current dragging DOM element
    */
-  onDragStop(i, x, y, {e, node}) {
-    const {oldDragItem} = this.state;
-    let {layout} = this.state;
+  onDragStop(i, x, y, { e, node }) {
+    const { oldDragItem } = this.state;
+    let { layout } = this.state;
     const l = getLayoutItem(layout, i);
-    if (!l) return;
+    if (!l) { return; }
 
     // Move the element here
     layout = moveElement(layout, l, x, y, true /* isUserAction */);
@@ -164,41 +164,41 @@ export default class GridLayout extends Component {
 
     // Set state
     const newLayout = compact(layout, this.props.verticalCompact);
-    const {oldLayout} = this.state;
+    const { oldLayout } = this.state;
     this.setState({
-      activeDrag: null,
-      layout: newLayout,
-      oldDragItem: null,
-      oldLayout: null,
+      activeDrag  : null,
+      layout      : newLayout,
+      oldDragItem : null,
+      oldLayout   : null,
     });
 
     this.onLayoutMaybeChanged(newLayout, oldLayout);
   }
 
   onLayoutMaybeChanged(newLayout, oldLayout) {
-    if (!oldLayout) oldLayout = this.state.layout;
+    if (!oldLayout) { oldLayout = this.state.layout; }
     if (!isEqual(oldLayout, newLayout)) {
       this.props.onLayoutChange(newLayout);
     }
   }
 
-  onResizeStart(i, w, h, {e, node}) {
-    const {layout} = this.state;
+  onResizeStart(i, w, h, { e, node }) {
+    const { layout } = this.state;
     var l = getLayoutItem(layout, i);
-    if (!l) return;
+    if (!l) { return; }
 
     this.setState({
-      oldResizeItem: cloneLayoutItem(l),
-      oldLayout: this.state.layout
+      oldResizeItem : cloneLayoutItem(l),
+      oldLayout     : this.state.layout
     });
 
     this.props.onResizeStart(layout, l, l, null, e, node);
   }
 
-  onResize(i, w, h, {e, node}) {
-    const {layout, oldResizeItem} = this.state;
+  onResize(i, w, h, { e, node }) {
+    const { layout, oldResizeItem } = this.state;
     var l = getLayoutItem(layout, i);
-    if (!l) return;
+    if (!l) { return; }
 
     // Set new width and height.
     l.w = w;
@@ -206,32 +206,32 @@ export default class GridLayout extends Component {
 
     // Create placeholder element (display only)
     var placeholder = {
-      w: w, h: h, x: l.x, y: l.y, static: true, i: i
+      w      : w, h      : h, x      : l.x, y      : l.y, static : true, i      : i
     };
 
     this.props.onResize(layout, oldResizeItem, l, placeholder, e, node);
 
     // Re-compact the layout and set the drag placeholder.
     this.setState({
-      layout: compact(layout, this.props.verticalCompact),
-      activeDrag: placeholder
+      layout     : compact(layout, this.props.verticalCompact),
+      activeDrag : placeholder
     });
   }
 
-  onResizeStop(i, w, h, {e, node}) {
-    const {layout, oldResizeItem} = this.state;
+  onResizeStop(i, w, h, { e, node }) {
+    const { layout, oldResizeItem } = this.state;
     var l = getLayoutItem(layout, i);
 
     this.props.onResizeStop(layout, oldResizeItem, l, null, e, node);
 
     // Set state
     const newLayout = compact(layout, this.props.verticalCompact);
-    const {oldLayout} = this.state;
+    const { oldLayout } = this.state;
     this.setState({
-      activeDrag: null,
-      layout: newLayout,
-      oldResizeItem: null,
-      oldLayout: null
+      activeDrag    : null,
+      layout        : newLayout,
+      oldResizeItem : null,
+      oldLayout     : null
     });
 
     this.onLayoutMaybeChanged(newLayout, oldLayout);
@@ -242,9 +242,9 @@ export default class GridLayout extends Component {
    * @return {Element} Placeholder div.
    */
   placeholder() {
-    const {activeDrag} = this.state;
-    if (!activeDrag) return null;
-    const {width, cols, margin, containerPadding, rowHeight, maxRows, useCSSTransforms} = this.props;
+    const { activeDrag } = this.state;
+    if (!activeDrag) { return null; }
+    const { width, cols, margin, containerPadding, rowHeight, maxRows, useCSSTransforms } = this.props;
 
     // {...this.state.activeDrag} is pretty slow, actually
     return (
@@ -275,17 +275,17 @@ export default class GridLayout extends Component {
    * @return {Element}       Element wrapped in draggable and properly placed.
    */
   processGridItem(child) {
-    if (!child.key) return;
+    if (!child.key) { return; }
     const l = getLayoutItem(this.state.layout, child.key);
-    if (!l) return null;
-    const {width, cols, margin, containerPadding, rowHeight,
+    if (!l) { return null; }
+    const { width, cols, margin, containerPadding, rowHeight,
            maxRows, isDraggable, isResizable, useCSSTransforms,
-           draggableCancel, draggableHandle} = this.props;
-    const {mounted} = this.state;
+           draggableCancel, draggableHandle } = this.props;
+    const { mounted } = this.state;
 
     // Parse 'static'. Any properties defined directly on the grid item will take precedence.
-    const draggable = Boolean(!l.static && isDraggable && (l.isDraggable || l.isDraggable == null));
-    const resizable = Boolean(!l.static && isResizable && (l.isResizable || l.isResizable == null));
+    const draggable = Boolean(!l['static'] && isDraggable && (l.isDraggable || l.isDraggable == null));
+    const resizable = Boolean(!l['static'] && isResizable && (l.isResizable || l.isResizable == null));
 
     return (
       <GridItem
@@ -317,7 +317,7 @@ export default class GridLayout extends Component {
         minW={l.minW}
         maxH={l.maxH}
         maxW={l.maxW}
-        static={l.static}
+        static={l['static']}
         >
         {child}
       </GridItem>
@@ -325,11 +325,11 @@ export default class GridLayout extends Component {
   }
 
   render() {
-    const {className, style} = this.props;
+    const { className, style } = this.props;
 
     const mergedClassName = `grid-layout ${className}`;
     const mergedStyle = {
-      height: this.containerHeight(),
+      height : this.containerHeight(),
       ...style
     };
 

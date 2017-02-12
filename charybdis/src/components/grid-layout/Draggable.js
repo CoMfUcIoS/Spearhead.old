@@ -2,12 +2,12 @@ import Inferno, { PropTypes } from 'inferno';
 import Component from 'inferno-component';
 import React from 'inferno-compat';
 import classNames from 'classnames';
-import {createCSSTransform, createSVGTransform} from './utils/domFns';
-import {canDragX, canDragY, createDraggableData, getBoundPosition} from './utils/positionFns';
-import {dontSetMe} from './utils/shims';
+import { createCSSTransform, createSVGTransform } from './utils/domFns';
+import { canDragX, canDragY, createDraggableData, getBoundPosition } from './utils/positionFns';
+import { dontSetMe } from './utils/shims';
 import DraggableCore from './DraggableCore';
 import log from './utils/log';
-import {DraggableEventHandler} from './utils/types';
+import { DraggableEventHandler } from './utils/types';
 
 //
 // Define <Draggable>
@@ -19,13 +19,13 @@ export default class Draggable extends Component {
 
   static defaultProps = {
     ...DraggableCore.defaultProps,
-    axis: 'both',
-    bounds: false,
-    defaultClassName: 'draggable',
-    defaultClassNameDragging: 'draggable-dragging',
-    defaultClassNameDragged: 'draggable-dragged',
-    defaultPosition: {x: 0, y: 0},
-    position: null
+    axis                     : 'both',
+    bounds                   : false,
+    defaultClassName         : 'draggable',
+    defaultClassNameDragging : 'draggable-dragging',
+    defaultClassNameDragged  : 'draggable-dragged',
+    defaultPosition          : { x : 0, y : 0 },
+    position                 : null
   };
 
   constructor(props) {
@@ -33,22 +33,22 @@ export default class Draggable extends Component {
 
     this.state = {
       // Whether or not we are currently dragging.
-      dragging: false,
+      dragging : false,
 
       // Whether or not we have been dragged before.
-      dragged: false,
+      dragged : false,
 
       // Current transform x and y.
-      x: props.position ? props.position.x : props.defaultPosition.x,
-      y: props.position ? props.position.y : props.defaultPosition.y,
+      x : props.position ? props.position.x : props.defaultPosition.x,
+      y : props.position ? props.position.y : props.defaultPosition.y,
 
       // Used for compensating for out-of-bounds drags
-      slackX: 0, slackY: 0,
+      slackX : 0, slackY : 0,
 
       // Can only determine if SVG after mounting
-      isElementSVG: false
+      isElementSVG : false
     };
-  };
+  }
 
   componentWillMount() {
     if (this.props.position && !(this.props.onDrag || this.props.onStop)) {
@@ -61,8 +61,8 @@ export default class Draggable extends Component {
 
   componentDidMount() {
     // Check to see if the element passed is an instanceof SVGElement
-    if(typeof SVGElement !== 'undefined' && Inferno.findDOMNode(this) instanceof SVGElement) {
-      this.setState({ isElementSVG: true });
+    if (typeof SVGElement !== 'undefined' && Inferno.findDOMNode(this) instanceof SVGElement) {
+      this.setState({ isElementSVG : true });
     }
   }
 
@@ -74,40 +74,40 @@ export default class Draggable extends Component {
           nextProps.position.y !== this.props.position.y
         )
       ) {
-      this.setState({ x: nextProps.position.x, y: nextProps.position.y });
+      this.setState({ x : nextProps.position.x, y : nextProps.position.y });
     }
   }
 
   componentWillUnmount() {
-    this.setState({dragging: false}); // prevents invariant if unmounted while dragging
+    this.setState({ dragging : false }); // prevents invariant if unmounted while dragging
   }
 
-  onDragStart (e, coreData) {
+  onDragStart(e, coreData) {
     log('Draggable: onDragStart: %j', coreData);
 
     // Short-circuit if user's callback killed it.
     const shouldStart = this.props.onStart(e, createDraggableData(this, coreData));
     // Kills start event on core as well, so move handlers are never bound.
-    if (shouldStart === false) return false;
+    if (shouldStart === false) { return false; }
 
-    this.setState({dragging: true, dragged: true});
-  };
+    this.setState({ dragging : true, dragged : true });
+  }
 
-  onDrag (e, coreData) {
-    if (!this.state.dragging) return false;
+  onDrag(e, coreData) {
+    if (!this.state.dragging) { return false; }
     log('Draggable: onDrag: %j', coreData);
 
     const uiData = createDraggableData(this, coreData);
 
     const newState = {
-      x: uiData.x,
-      y: uiData.y
+      x : uiData.x,
+      y : uiData.y
     };
 
     // Keep within bounds.
     if (this.props.bounds) {
       // Save original x and y.
-      const {x, y} = newState;
+      const { x, y } = newState;
 
       // Add slack to the values used to calculate bound position. This will ensure that if
       // we start removing slack, the element won't react to it right away until it's been
@@ -132,40 +132,41 @@ export default class Draggable extends Component {
 
     // Short-circuit if user's callback killed it.
     const shouldUpdate = this.props.onDrag(e, uiData);
-    if (shouldUpdate === false) return false;
+    if (shouldUpdate === false) { return false; }
 
     this.setState(newState);
-  };
+  }
 
   onDragStop(e, coreData) {
-    if (!this.state.dragging) return false;
+    if (!this.state.dragging) { return false; }
 
     // Short-circuit if user's callback killed it.
     const shouldStop = this.props.onStop(e, createDraggableData(this, coreData));
-    if (shouldStop === false) return false;
+    if (shouldStop === false) { return false; }
 
     log('Draggable: onDragStop: %j', coreData);
 
     const newState = {
-      dragging: false,
-      slackX: 0,
-      slackY: 0
+      dragging : false,
+      slackX   : 0,
+      slackY   : 0
     };
 
     // If this is a controlled component, the result of this operation will be to
     // revert back to the old position. We expect a handler on `onDragStop`, at the least.
     const controlled = Boolean(this.props.position);
     if (controlled) {
-      const {x, y} = this.props.position;
+      const { x, y } = this.props.position;
       newState.x = x;
       newState.y = y;
     }
 
     this.setState(newState);
-  };
+  }
 
   render() {
-    let style = {}, svgTransform = null;
+    let style = {},
+        svgTransform = null;
 
     // If this is controlled, we don't want to move it - unless it's dragging.
     const controlled = Boolean(this.props.position);
@@ -174,12 +175,12 @@ export default class Draggable extends Component {
     const position = this.props.position || this.props.defaultPosition;
     const transformOpts = {
       // Set left if horizontal drag is enabled
-      x: canDragX(this) && draggable ?
+      x : canDragX(this) && draggable ?
         this.state.x :
         position.x,
 
       // Set top if vertical drag is enabled
-      y: canDragY(this) && draggable ?
+      y : canDragY(this) && draggable ?
         this.state.y :
         position.y
     };
@@ -203,8 +204,8 @@ export default class Draggable extends Component {
 
     // Mark with class while dragging
     const className = classNames((this.props.children.props.className || ''), defaultClassName, {
-      [defaultClassNameDragging]: this.state.dragging,
-      [defaultClassNameDragged]: this.state.dragged
+      [defaultClassNameDragging] : this.state.dragging,
+      [defaultClassNameDragged]  : this.state.dragged
     });
 
     // Reuse the child provided
@@ -212,9 +213,9 @@ export default class Draggable extends Component {
     return (
       <DraggableCore {...this.props} onStart={this.onDragStart} onDrag={this.onDrag} onStop={this.onDragStop}>
         {React.cloneElement(React.Children.only(this.props.children), {
-          className: className,
-          style: {...this.props.children.props.style, ...style},
-          transform: svgTransform
+          className : className,
+          style     : { ...this.props.children.props.style, ...style },
+          transform : svgTransform
         })}
       </DraggableCore>
     );
