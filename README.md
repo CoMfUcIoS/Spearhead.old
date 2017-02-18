@@ -20,42 +20,61 @@ Features:
 ### Installation
 There are some things to consider before running spearhead
 First of all requires [Node.js](https://nodejs.org/) v6.6 or greater to run.
+
 ```sh
-$ sudo apt-get install nodejs
-$ sudo npm install n -g
-$ sudo n stable
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
+source ~/.bashrc
+nvm install node
 ```
+
+or
+
+```sh
+sudo apt-get install nodejs
+sudo npm install n -g
+sudo n stable
+```
+
 It’s a general rule that you shouldn’t run node as root, but only root can bind to ports less than 1024. This is where authbind comes in. Authbind allows non-root users to bind to ports less than 1024.
 ```sh
-$ sudo npm install pm2 -g
-$ sudo apt-get install authbind
-$ sudo touch /etc/authbind/byport/80
-$ sudo chown [user] /etc/authbind/byport/80
-$ sudo chmod 755 /etc/authbind/byport/80
-$ sudo touch /etc/authbind/byport/443
-$ sudo chown [user] /etc/authbind/byport/443
-$ sudo chmod 755 /etc/authbind/byport/443
-$ authbind --deep pm2 update
+sudo npm install pm2 -g
+sudo apt-get install authbind
+sudo touch /etc/authbind/byport/80
+sudo chown [user] /etc/authbind/byport/80
+sudo chmod 755 /etc/authbind/byport/80
+sudo touch /etc/authbind/byport/443
+sudo chown [user] /etc/authbind/byport/443
+sudo chmod 755 /etc/authbind/byport/443
+authbind --deep pm2 update
 ```
 Now you can start applications with PM2 that can bind to port 80 without being root!
 It’s recommended to put an alias in your .bashrc file:
 ```sh
 alias pm2='authbind --deep pm2'
 ```
+then run
+```sh
+source ~/.bashrc
+```
 ##### Note
 > if you have problems installing authbind or its not available on your device then there is a workaround at the bottom of this README.md file
 
 You also need to setcap to nodejs executable
 
+find node executable
 ```sh
-sudo setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
+which node
+```
+then setcap on that executable file
+```sh
+sudo setcap 'cap_net_bind_service=+ep' <binfullpath>
 ```
 
 Then install all dependencies and run the app
 ```sh
-$ cd spearhead
-$ npm install
-$ npm run start
+cd spearhead
+npm install
+npm run start
 ```
 Now use your favorite browser and surf to https://localhost/.
 
@@ -74,12 +93,12 @@ Enjoy!
 If for some reason authbind is not available then you can actual fake it ;)
 Find from where your bash executable is
 ```sh
-$ which bash
+which bash
 ```
 copy the location you are going to need it almost everywhere
 then find where the /usr/bin folder is and add a file
 ```sh
-$ nano /usr/bin/authbind
+nano /usr/bin/authbind
 ```
 paste the following in that file
 ```sh
@@ -93,6 +112,5 @@ ARGS=();
 ```
 then make it executable.
 ```sh
-$ chmod a+x /usr/bin/authbind
+chmod a+x /usr/bin/authbind
 ```
-

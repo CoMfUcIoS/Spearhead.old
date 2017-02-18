@@ -32,8 +32,8 @@ const webpack = require('webpack'),
     config = {
       resolve : {
         alias : {
-          'react' : 'inferno-compat',
-          'react-dom' : 'inferno-compat',
+          react              : 'inferno-compat',
+          'react-dom'        : 'inferno-compat',
           'react-dom/server' : 'inferno-compat',
         }
       },
@@ -68,11 +68,11 @@ const webpack = require('webpack'),
       },
       plugins : debug ? [
         new webpack.ProvidePlugin({
-          'Inferno' : 'react'
+          Inferno : 'react'
         })
       ] : [
         new webpack.ProvidePlugin({
-            'Inferno' : 'react'
+          Inferno : 'react'
         }),
         new ExtractTextPlugin('../css/style.css'),
         new webpack.DefinePlugin({
