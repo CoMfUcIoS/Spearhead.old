@@ -8,6 +8,7 @@
     "default" : 1233,
     "cerberus" : 1233,
     "medusa" : 1233,
+    "gitlab: : 7070,
     "ws": 4730
   },
   "debug" : true,
@@ -15,6 +16,7 @@
   "allowedSSLDomains" : [
     "rpi.studio110.eu",
     "ws.studio110.eu",
+    "gitlab.studio110.eu",
     "john.gotdns.ch"
   ]
 }
