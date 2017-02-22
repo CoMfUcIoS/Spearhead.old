@@ -2,6 +2,7 @@
   "allowedSSLDomains": [
     "rpi.studio110.eu",
     "ws.studio110.eu",
+    "gitlab.studio110.eu",
     "john.gotdns.ch"
   ],
   "avahiPath": "/usr/sbin/avahi-daemon",
@@ -10,6 +11,7 @@
     "cerberus": 80,
     "hydra": 4730,
     "medusa": 1233,
+    "gitlab": 7070,
     "charybdis": 3000
   },
   "vhosts": {
@@ -17,6 +19,7 @@
     "default": 3000,
     "medusa": 1233,
     "charybdis": 1233,
+    "gitlab": 7070,
     "ws": 4730
   }
 }
